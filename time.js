@@ -6,28 +6,28 @@ var month = (week * 4);
 var year = (month * 12);
 
 module.exports = {
-	day: function() {
-		return (new Date().getTime() + day);
-	}
-	,week: function() {
-		return (new Date().getTime() + week);
-	}
-	,month: function() {
-		return (new Date().getTime() + month);
-	}
-	,year: function() {
-		return (new Date().getTime() + year);
-	}
-	,daysAgo: function(num) {
-		return (new Date().getTime() - (num * days));
-	}
-	,weeksAgo: function(num) {
-		return (new Date().getTime() - (num * week));
-	}
-	,monthsAgo: function(num) {
-		return (new Date().getTime() - (num * week));
-	}
-	,yearsAgo: function(num) {
-		return (new Date().getTime() - (num * year));
-	}
+  day: function() {
+    return (new Date().getTime() + day);
+  }
+  ,week: function() {
+    return (new Date().getTime() + week);
+  }
+  ,month: function() {
+    return (new Date().getTime() + month);
+  }
+  ,year: function() {
+    return (new Date().getTime() + year);
+  }
+  ,daysAgo: function(num) {
+    return (new Date().getTime() - (num * days));
+  }
+  ,weeksAgo: function(num) {
+    return (new Date().getTime() - (num * week));
+  }
+  ,monthsAgo: function(num) {
+    return (new Date().getTime() - (num * week));
+  }
+  ,yearsAgo: function(num) {
+    return (new Date().getTime() - (num * year));
+  }
 };
