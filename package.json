@@ -1,0 +1,17 @@
+{
+  "name": "forgetsy.js",
+  "version": "0.0.0",
+  "description": "Forgetsy.js is a scalable trending library designed to track temporal trends in non-stationary categorical distributions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "redis": "*",
+    "hiredis": "*"
+  },
+  "devDependencies": {
+  },
+  "author": "",
+  "license": "ISC"
+}
