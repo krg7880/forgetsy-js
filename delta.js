@@ -1,6 +1,6 @@
 'use strict';
 
-var set = require('./set');
+var Set = require('./set');
 var time = require('./time');
 var connection = require('./connection');
 var client = connection.get();
@@ -15,12 +15,12 @@ Delta.prototype.create = function(opts) {
   var d = when.defer();
   var secondaryDate = this.getSecondaryDate(opts.date);
   var self = this;
-  when(set.create({
+  when(Set.create({
     name: this.getPrimarySetKey()
     ,time: opts.time
     ,date: opts.date
   })).then(function() {
-    when(set.create({
+    when(Set.create({
       name: self.getSecondarySetKey()
       ,time: (opts.time * TIME_NORM_MULTIPLIER)
       ,date: secondaryDate
@@ -42,26 +42,58 @@ Delta.prototype.getSecondaryDate = function(opts) {
   return Date.now() - ((Date.now() - opts.date) * TIME_NORM_MULTIPLIER);
 };
 
+/**
+ Fetch the primary and secondary
+ set and increment them both
+*/
 Delta.prototype.incr = function(opts) {
+  var d = when.defer();
   var self = this;
-  when(set.fetch(this.getPrimarySetKey()))
-    .then(function(set) {
-      when(set.incr(opts))
-        .then(function() {
-          when(set.fetch(this.getSecondarySetKey))
-            .then(d.resolve)
-            .otherwise(d.reject);
-        });
-    }).otherwise(d.reject);
+  var deltas = this.deltas();
+  var completed = 0;
+
+  var check = function() {
+    if (++completed >= deltas.length) {
+      if (errors) {
+        d.reject(error);
+      } else {
+        d.resolve();
+      }
+    }
+  };
+
+  deltas.forEach(function(delta) {
+    when(Set.fetch(delta))
+     .then(function(set) {
+        console.log('Set', set);
+        when(set.incr(opts))
+          .then(function() {
+            check();
+          }).otherwise(function() {
+            check();
+          })
+      }).otherwise(function() {
+        check();
+      })
+  });
+
+  return d.promise;
+};
+
+Delta.prototype.deltas = function() {
+  return [this.getPrimarySetKey(), this.getSecondarySetKey()];
 };
 
 Delta.prototype.exists = function() {
   var d = when.defer();
   client.exists([this.name], function(e, res) {
+    console.log(res);
     if (e) {
       d.reject(e);
-    } else {
+    } else if (parseInt(res, 10) === 1) {
       d.resolve();
+    } else {
+      d.reject(new Error('Delta does not exists!'));
     }
   });
   return d.promise;
@@ -87,8 +119,13 @@ exports.create = function(opts) {
   return d.promise;
 };
 
-exports.incr = function(opts) {
+exports.fetch = function(opts) {
   var d = when.defer();
+  var delta = new Delta(opts);
+  when(delta.exists())
+    .then(function() {
+      d.resolve(delta)
+    }).otherwise(d.reject);
 
   return d.promise;
-};
+}
