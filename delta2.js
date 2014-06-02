@@ -29,8 +29,71 @@ Delta.prototype.init = function(opts) {
   return d.promise;
 };
 
+Delta.prototype.incr = function(opts) {
+  var d = when.defer();
+  when(this.getSets())
+    .then(function(sets) {
+      var errors = [];
+      var count = 0;
+      var check = function() {
+        if (++count >= sets.length) {
+          if (errors.length > 0) {
+            d.reject(errors);
+          } else {
+            d.resolve();
+          }
+        }
+      };
+
+      sets.forEach(function(i, set) {
+        when(set.incr(opts))
+          .then(function(){
+            check();
+          })
+          .otherwise(function(e) {
+            errors.push(e);
+            check();
+          })
+      });
+    }).otherwise(d.reject);
+
+  return d.promise;
+};
+
+Delta.prototype.incr_by = function(opts) {
+  var d = when.defer();
+  when(this.getSets())
+    .then(function(sets) {
+      var errors = [];
+      var count = 0;
+      var check = function() {
+        if (++count >= sets.length) {
+          if (errors.length > 0) {
+            d.reject(errors);
+          } else {
+            d.resolve();
+          }
+        }
+      };
+      
+      sets.forEach(function(i, set) {
+        when(set.incr_by(opts))
+          .then(function(){
+            check();
+          })
+          .otherwise(function(e) {
+            errors.push(e);
+            check();
+          })
+      });
+    }).otherwise(d.reject);
+
+  return d.promise;
+};
+
 Delta.prototype.exists = function(name) {
   var d = when.defer();
+
   client.exists(name, function(e, res) {
     if (e) {
       d.reject(e);
@@ -38,6 +101,32 @@ Delta.prototype.exists = function(name) {
       d.resolve(res);
     }
   });
+
+  return d.promise;
+};
+
+Delta.prototype.getSet = function(key) {
+  var d = when.defer();
+
+  when(Set.fetch(key))
+    .then(d.resolve)
+    .otherwise(d.reject);
+
+  return d.promise;
+};
+
+Delta.prototype.getSets = function() {
+  var d = when.defer();
+  var sets = [];
+  when(this.getSet(this.getPrimaryKey))
+    .then(function(set) {
+      sets.push(set);
+      when(self.getSet(self.getSecondaryKey()))
+        .then(function(set) {
+          sets.push(set);
+          d.resolve(sets);
+        }).otherwise(d.reject);
+    }).otherwise(d.reject);
 
   return d.promise;
 };
