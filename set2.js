@@ -2,6 +2,18 @@ var when = require('when');
 var connection = require('./connection');
 var client = connection.get();
 
+function arrayToObject(arr) {
+  var tmp = {};
+  var len = arr.length;
+  for (var i=0; i<len; i++) {
+    if ((i % 2) == 0) {
+      tmp[arr[i]] = arr[++i];
+    }
+  }
+
+  return tmp;
+}
+
 var Set = function(name) {
   this.name = name;
   this.last_decayed_key = '_last_decay';
@@ -38,13 +50,14 @@ Set.prototype.decay = function() {
   var t1 = opts.date || Date.now();
   var delta = t1 - t0;
   var set = this.fetch_raw();
+  var rate = null;
   var self = this;
 
   when(this.getLastDecayDate())
     then(function(date) {
-      var t0 = date;
-      var t1 = opts.date || Date.now();
-      var delta = t1 - t0;
+      // set the delta
+      t0 = date;
+      delta = t1 - t0;
 
       // get the set
       when(self.fetchRaw())
@@ -57,16 +70,17 @@ Set.prototype.decay = function() {
 
               var multi = client.multi();
               var cmds = [];
+
               set.forEach(function(k, v) {
-                var new_v = v * Math.exp(- delta * rate);
+                var new_v = v * Math.exp(-delta * rate);
                 multi.zadd(self.name, new_v, k);
               });
 
               multi.exec(function(e, replies) {
-                console.log(e, replies);
                 if (e) {
                   d.reject(e);
                 } else {
+
                   when(self.updateDecayDate(Date.now()))
                     .then(d.resolve)
                     .otherwise(d.reject);
@@ -124,11 +138,11 @@ Set.prototype.getLastDecayDate = function() {
 };
 
 Set.prototype.fetchRaw = function(opts) {
-  console.log('fetching raw');
   var d = when.defer();
   opts = opts || {};
   var limit = opts.limit || -1;
   var bufferedLimit = limit;
+  var self = this;
 
   if (limit > 0) {
     bufferedLimit += this.specialKeys().length;
@@ -138,6 +152,8 @@ Set.prototype.fetchRaw = function(opts) {
     if (e) {
       d.reject(e);
     } else {
+      set = arrayToObject(set);
+      set = self.filterSpecialKeys(set);
       d.resolve(set);
     }
   });
@@ -180,6 +196,25 @@ exports.create = function(opts) {
     });
 };
 
+/**
+Need to understand better what's going on
+here in Ruby
+*/
+Set.prototype.filterSpecialKeys = function(set, limit) {
+  var newSet = {};
+  var specialKeys = this.specialKeys();
+  var keys = Object.keys(set);
+
+  for (var i=0; i<keys.length; i++) {
+    if (specialKeys[keys[i]]) {
+      delete set[i];
+    } 
+  }
+
+  return set;
+  // need to return the results
+};
+
 exports.fetch = function(name) {
   return new Set(name);
 };
@@ -195,7 +230,8 @@ var check = function(i) {
 }
 
 // run a test
-when(set.fetch({bin: 'User'})).then(function(users) {
+
+when(set.fetch({})).then(function(users) {
   console.log('users', users);
   check();
 }).otherwise(function(e) {
