@@ -125,7 +125,7 @@ Set.prototype.getLastDecayDate = function() {
       d.resolve(res);
     }
   });
-  return d.promise();
+  return d.promise;
 };
 
 Set.prototype.fetchRaw = function(opts) {
@@ -164,13 +164,48 @@ Set.prototype.updateDecayDate = function(date) {
   return d.promise;
 };
 
+Set.prototype.incr = function(opts) {
+  var d = when.defer();
+  var date = opts.date || Date.now();
+  when(this.isValidIncrDate(date))
+    .then(function() {
+      client.zincrby([this.name, 1, opts.bin], function(e, res) {
+        if (e) {
+          d.reject(e);
+        } else {
+          d.resolve(res);
+        }
+      });
+    }).otherwise(function() {
+      d.reject(new Error('Invalid increment date!'));
+    });
+
+  return d.promise;
+};
+
+Set.prototype.isValidIncrDate = function(date) {
+  var d = when.defer();
+
+  when(this.getLastDecayDate())
+    .then(function(_date) {
+      console.log(_date);
+      if (date > _date) {
+        d.resolve()
+      } else {
+        d.reject()
+      }
+    }).otherwise(d.reject);
+
+  return d.promise;
+};
+
 Set.prototype.specialKeys = function() {
   return [this.lifetime_key, this.last_decayed_key];
 };
 
 Set.prototype.createLifetimeKey = function(date) {
   var d = when.defer();
-  cleint.zadd([this.name, date, this.lifetime_key], function(e, res) {
+  client.zadd([this.name, date, this.lifetime_key], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
@@ -198,7 +233,7 @@ exports.create = function(opts) {
         .then(d.resolve)
         .otherwise(d.reject);
     }).otherwise(function(e) {
-      console.log('create error');
+      console.log('create error', e);
     });
 
   return d.promise;
@@ -227,7 +262,7 @@ exports.fetch = function(name) {
 };
 
 var set = exports.fetch('follows');
-var start = new Date().getTime();
+/*var start = new Date().getTime();
 var max = 1
 var count = 0;
 
@@ -236,12 +271,12 @@ var check = function(i) {
     console.log('End time ', (new Date().getTime() - start) );
   }
 }
-
+*/
 // run a test
-when(set.fetch({})).then(function(users) {
+/*when(set.fetch({})).then(function(users) {
   console.log('users', users);
   check();
 }).otherwise(function(e) {
   console.log('Error', e);
   count();
-});
+});*/

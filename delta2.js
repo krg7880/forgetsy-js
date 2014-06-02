@@ -1,4 +1,6 @@
-var Set = require('./set');
+var Set = require('./set2');
+var time = require('./time');
+var when = require('when');
 var connection = require('./connection');
 var client = connection.get();
 var NORM_T_MULT = 2;
@@ -8,21 +10,24 @@ var Delta = function(name) {
 };
 
 Delta.prototype.init = function(opts) {
-  if (!opts.key) {
-    throw new Error('Missing distribution key');
+  if (!opts.time) {
+    throw new Error('Missing time');
   }
 
   var d = when.defer();
+  var self = this;
   var secondaryDate = Date.now() - ((Date.now() - opts.date) * NORM_T_MULT);
   when(Set.create({
     key: this.getPrimaryKey()
     , time: opts.time
     , date: opts.date
+    , name: this.name
   })).then(function() {
     when(Set.create({
-      key: this.getSecondaryKey()
+      key: self.getSecondaryKey()
       , time: opts.time * NORM_T_MULT
-      , secondaryDate
+      , date: secondaryDate
+      , name: self.name
     })).then(d.resolve).otherwise(d.reject);
   }).otherwise(d.reject);
 
@@ -34,7 +39,7 @@ Delta.prototype.incr = function(opts) {
   when(this.getSets())
     .then(function(sets) {
       var errors = [];
-      var count = 0;
+      var count = 0;      
       var check = function() {
         if (++count >= sets.length) {
           if (errors.length > 0) {
@@ -44,13 +49,14 @@ Delta.prototype.incr = function(opts) {
           }
         }
       };
-
-      sets.forEach(function(i, set) {
+      
+      sets.forEach(function(set) {
         when(set.incr(opts))
           .then(function(){
             check();
           })
           .otherwise(function(e) {
+            console.log('E', e);
             errors.push(e);
             check();
           })
@@ -118,6 +124,7 @@ Delta.prototype.getSet = function(key) {
 Delta.prototype.getSets = function() {
   var d = when.defer();
   var sets = [];
+  var self = this;
   when(this.getSet(this.getPrimaryKey))
     .then(function(set) {
       sets.push(set);
@@ -172,3 +179,16 @@ exports.fetch = function(name) {
     }).otherwise(reject);
   return d.promise;
 };
+
+
+when(exports.create({name: 'member', time: time.week()}))
+  .then(function(delta) {
+    when(delta.incr({bin: 'User', date: time.week()}))
+      .then(function() {
+        console.log('Incremented!');
+      }).otherwise(function(e) {
+        console.log('Incr Error', e);
+      });
+  }).otherwise(function(e) {
+    console.log('Delta Error', e);
+  })
