@@ -62,14 +62,12 @@ Set.prototype.decay = function() {
       // get the set
       when(self.fetchRaw())
         .then(function(set) {
-          
           // get the lifetime
           when(self.getLifetime())
             .then(function(lifetime) {
               rate = 1 / lifetime;
 
               var multi = client.multi();
-              var cmds = [];
 
               set.forEach(function(k, v) {
                 var new_v = v * Math.exp(-delta * rate);
@@ -86,16 +84,9 @@ Set.prototype.decay = function() {
                     .otherwise(d.reject);
                 }
               });
-            }).otherwise(function(e) {
-              d.reject(e);
-            })
-        }).otherwise(function(e) {
-          d.reject(e);
-        })
-    })
-    .otherwise(function(e) {
-      d.reject(e);
-    })
+            }).otherwise(d.reject);
+        }).otherwise(d.reject);
+    }).otherwise(d.reject);
 
   return d.promise;
 };
@@ -177,6 +168,18 @@ Set.prototype.specialKeys = function() {
   return [this.lifetime_key, this.last_decayed_key];
 };
 
+Set.prototype.createLifetimeKey = function(date) {
+  var d = when.defer();
+  cleint.zadd([this.name, date, this.lifetime_key], function(e, res) {
+    if (e) {
+      d.reject(e);
+    } else {
+      d.resolve(res);
+    }
+  })
+  return d.promise;
+};
+
 /**
 # @param float opts[time] : mean lifetime of an observation (secs).
 # @param datetime opts[date] : a manual date to start decaying from.
@@ -186,14 +189,19 @@ exports.create = function(opts) {
     throw new Error('Missing required option: object.time');
   }
 
+  var d = when.defer();
   var date = opts['date'] || Date.now();
   var set = new Set(opts.name);
   when(set.updateDecayDate(date))
     .then(function() {
-      set.createLifetimeKey(opts.time);
+      when(set.createLifetimeKey(opts.time))
+        .then(d.resolve)
+        .otherwise(d.reject);
     }).otherwise(function(e) {
       console.log('create error');
     });
+
+  return d.promise;
 };
 
 /**
@@ -212,7 +220,6 @@ Set.prototype.filterSpecialKeys = function(set, limit) {
   }
 
   return set;
-  // need to return the results
 };
 
 exports.fetch = function(name) {
@@ -223,6 +230,7 @@ var set = exports.fetch('follows');
 var start = new Date().getTime();
 var max = 1
 var count = 0;
+
 var check = function(i) {
   if (++count >= max) {
     console.log('End time ', (new Date().getTime() - start) );
@@ -230,7 +238,6 @@ var check = function(i) {
 }
 
 // run a test
-
 when(set.fetch({})).then(function(users) {
   console.log('users', users);
   check();
