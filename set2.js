@@ -54,7 +54,7 @@ Set.prototype.decay = function() {
   var self = this;
 
   when(this.getLastDecayDate())
-    then(function(date) {
+    .then(function(date) {
       // set the delta
       t0 = date;
       delta = t1 - t0;
