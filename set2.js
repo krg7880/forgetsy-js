@@ -22,14 +22,13 @@ var Set = function(key) {
 };
 
 Set.prototype.fetch = function(opts) {
-  var d = when.defer();
   var limit = opts.limit || -1;
   var decay = opts.decay || true;
   var scrub = opts.scrub || true;
   var self = this;
-
   var run = function() {
     if (opts.bin) {
+      var d = when.defer();
       client.zscore([self.key, opts.bin], function(e, res) {
         if (e) {
           d.reject(e);
@@ -37,28 +36,28 @@ Set.prototype.fetch = function(opts) {
           d.resolve(res);
         }
       });
+      return d.promise;
     } else {
-      when(self.fetchRaw({limit: limit}))
-        .then(d.resolve)
-        .otherwise(d.reject);
+      return when(self.fetchRaw({limit: limit}))
+        //.then(d.resolve)
+        //.otherwise(d.reject);
     }
   };
 
   if (decay) {
-    when(this.decay(opts))
+    return when(this.decay(opts))
       .then(function() {
         if (scrub) {
-          when(self.scrub(opts))
+          return when(self.scrub(opts))
             .then(function() {
-              run();
-            }).otherwise(d.reject);
+              return run();
+            })//.otherwise(d.reject);
         }
-      }).otherwise(d.reject);
+      })//.otherwise(d.reject);
   } else {
-    run();
+    return run();
   }
 
-  return d.promise;
 };
 
 Set.prototype.decay = function(opts) {
@@ -136,7 +135,7 @@ Set.prototype.getLastDecayDate = function() {
     if (e) {
       d.reject(e);
     } else {
-      d.resolve(res);
+      d.resolve(parseInt(res,10));
     }
   });
   return d.promise;
@@ -168,10 +167,12 @@ Set.prototype.fetchRaw = function(opts) {
 
 Set.prototype.updateDecayDate = function(date) {
   var d = when.defer();
+  console.log('updateDecayDate', new Date(date));
   client.zadd([this.key, date, this.last_decayed_key], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
+      console.log('RES', e, res);
       d.resolve(res);
     }
   });
@@ -204,6 +205,7 @@ Set.prototype.isValidIncrDate = function(date) {
 
   when(this.getLastDecayDate())
     .then(function(_date) {
+      console.log(new Date(date), new Date(_date));
       if (date > _date) {
         d.resolve()
       } else {
@@ -239,9 +241,15 @@ exports.create = function(opts) {
     throw new Error('Missing required option: object.time');
   }
 
-  var d = when.defer();
+  //var d = when.defer();
   var date = opts['date'] || Date.now();
   var set = new Set(opts.key);
+  return set.updateDecayDate(date).then(function() {
+    console.log('update decay date', new Date(date));
+    return set.createLifetimeKey(opts.time);
+  });
+
+  /*
   when(set.updateDecayDate(date))
     .then(function() {
       when(set.createLifetimeKey(opts.time))
@@ -250,6 +258,7 @@ exports.create = function(opts) {
     }).otherwise(d.reject);
 
   return d.promise;
+  */
 };
 
 /**
