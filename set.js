@@ -65,6 +65,6 @@ exports.create = function(opts) {
 exports.fetch = function(opts) {
   var d = when.defer();
   var limit = opts.limit || -1;
-
+  
   return d.promise;
 };

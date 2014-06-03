@@ -34,6 +34,80 @@ Delta.prototype.init = function(opts) {
   return d.promise;
 };
 
+Delta.prototype.fetch = function(opts) {
+  opts = opts || {};
+  var d = when.defer();
+  var limit = opts.limit || -1;
+  delete opts.limit;
+  var bin = opts.bin || null;
+  var count = 0;
+  var norm = 0;
+  var result = null;
+  var self = this;
+
+  if (!bin) {
+    when(this.getSet(this.getPrimaryKey()))
+      .then(function(primarySet) {
+        when(self.getSet(self.getSecondaryKey()))
+          .then(function(secondarySet) {
+            when(primarySet.fetch(opts))
+              .then(function(_count) {
+                count = _count;
+                when(secondarySet.fetch(opts))
+                  .then(function(_norm) {
+                    norm = _norm;
+                    value = 0;
+                    var results = [];
+                    for (var i in count) {
+                      var norm_v = norm[i];
+                      var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]) / parseFloat(norm_v).toFixed(2);
+                      results[i] = value;
+                    }
+                    d.resolve(results);
+                  })
+              }).otherwise(function(e) {
+                console.log('Error', e);
+                d.reject(e);
+              });
+          })
+          .otherwise(d.reject);
+      }).otherwise(function(e) {
+        console.log('error', e);
+        d.reject(e);
+      })
+  } else {
+    when(this.getSet(this.getPrimaryKey()))
+      .then(function(primarySet) {
+        when(self.getSet(self.getSecondaryKey()))
+          .then(function(secondarySet) {
+            when(primarySet.fetch(opts))
+              .then(function(_count) {
+                count = _count;
+                when(secondarySet.fetch(opts))
+                  .then(function(_norm) {
+                    norm = _norm;
+                    var results = {};
+                    if (!norm) {
+                      results[bin] = null;
+                    } else {
+                      var norm_v = parseFloat(count) / parseFloat(norm).toFixed(2);
+                      results[bin] = norm_v;
+                    }
+                    d.resolve(results);
+                  })
+              }).otherwise(function(e) {
+                d.reject(e);
+              });
+          })
+          .otherwise(d.reject);
+      }).otherwise(function(e) {
+        d.reject(e);
+      })
+  }
+
+  return d.promise;
+};
+
 Delta.prototype.incr = function(opts) {
   var d = when.defer();
   when(this.getSets())
@@ -125,7 +199,7 @@ Delta.prototype.getSets = function() {
   var d = when.defer();
   var sets = [];
   var self = this;
-  when(this.getSet(this.getPrimaryKey))
+  when(this.getSet(this.getPrimaryKey()))
     .then(function(set) {
       sets.push(set);
       when(self.getSet(self.getSecondaryKey()))
@@ -176,19 +250,6 @@ exports.fetch = function(name) {
   when(delta.exists(name))
     .then(function() {
       d.resolve(delta);
-    }).otherwise(reject);
+    }).otherwise(d.reject);
   return d.promise;
 };
-
-
-when(exports.create({name: 'member', time: time.week()}))
-  .then(function(delta) {
-    when(delta.incr({bin: 'User', date: time.week()}))
-      .then(function() {
-        console.log('Incremented!');
-      }).otherwise(function(e) {
-        console.log('Incr Error', e);
-      });
-  }).otherwise(function(e) {
-    console.log('Delta Error', e);
-  })

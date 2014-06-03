@@ -14,8 +14,8 @@ function arrayToObject(arr) {
   return tmp;
 }
 
-var Set = function(name) {
-  this.name = name;
+var Set = function(key) {
+  this.key = key;
   this.last_decayed_key = '_last_decay';
   this.lifetime_key = '_t';
   this.hi_pass_filter = 0.0001;
@@ -26,30 +26,47 @@ Set.prototype.fetch = function(opts) {
   var limit = opts.limit || -1;
   var decay = opts.decay || true;
   var scrub = opts.scrub || true;
+  var self = this;
 
-  if (opts.bin) {
-    client.zscore([this.name, opts.bin], function(e, res) {
-      if (e) {
-        d.reject(e);
-      } else {
-        d.resolve(res);
-      }
-    });
+  var run = function() {
+    if (opts.bin) {
+      client.zscore([self.key, opts.bin], function(e, res) {
+        if (e) {
+          d.reject(e);
+        } else {
+          d.resolve(res);
+        }
+      });
+    } else {
+      when(self.fetchRaw({limit: limit}))
+        .then(d.resolve)
+        .otherwise(d.reject);
+    }
+  };
+
+  if (decay) {
+    when(this.decay(opts))
+      .then(function() {
+        if (scrub) {
+          when(self.scrub(opts))
+            .then(function() {
+              run();
+            }).otherwise(d.reject);
+        }
+      }).otherwise(d.reject);
   } else {
-    when(this.fetchRaw({limit: limit}))
-      .then(d.resolve)
-      .otherwise(d.reject);
+    run();
   }
 
   return d.promise;
 };
 
-Set.prototype.decay = function() {
-  var d = d.when();
+Set.prototype.decay = function(opts) {
+  opts = opts || {};
+  var d = when.defer();
   var t0 = null;
   var t1 = opts.date || Date.now();
   var delta = t1 - t0;
-  var set = this.fetch_raw();
   var rate = null;
   var self = this;
 
@@ -58,7 +75,6 @@ Set.prototype.decay = function() {
       // set the delta
       t0 = date;
       delta = t1 - t0;
-
       // get the set
       when(self.fetchRaw())
         .then(function(set) {
@@ -66,19 +82,17 @@ Set.prototype.decay = function() {
           when(self.getLifetime())
             .then(function(lifetime) {
               rate = 1 / lifetime;
-
               var multi = client.multi();
 
-              set.forEach(function(k, v) {
-                var new_v = v * Math.exp(-delta * rate);
-                multi.zadd(self.name, new_v, k);
-              });
+              for (var i in set) {
+                var v = set[i] * Math.exp(-delta * rate);
+                multi.zadd(self.key, v, i);
+              }
 
               multi.exec(function(e, replies) {
                 if (e) {
                   d.reject(e);
                 } else {
-
                   when(self.updateDecayDate(Date.now()))
                     .then(d.resolve)
                     .otherwise(d.reject);
@@ -93,7 +107,7 @@ Set.prototype.decay = function() {
 
 Set.prototype.getLifetime = function() {
   var d = when.defer();
-  client.zscore([this.name, this.lifetime_key], function(e, lifetime) {
+  client.zscore([this.key, this.lifetime_key], function(e, lifetime) {
     if (e) {
       d.reject(e);
     } else {
@@ -105,7 +119,7 @@ Set.prototype.getLifetime = function() {
 
 Set.prototype.scrub = function() {
   var d = when.defer();
-  client.zremrangebyscore([this.name, '-inf', this.hi_pass_filter], function(e, res) {
+  client.zremrangebyscore([this.key, '-inf', this.hi_pass_filter], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
@@ -118,7 +132,7 @@ Set.prototype.scrub = function() {
 
 Set.prototype.getLastDecayDate = function() {
   var d = when.defer();
-  client.zscore([this.name, this.last_decayed_key], function(e, res) {
+  client.zscore([this.key, this.last_decayed_key], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
@@ -139,7 +153,7 @@ Set.prototype.fetchRaw = function(opts) {
     bufferedLimit += this.specialKeys().length;
   }
 
-  client.zrevrange(this.name, 0, bufferedLimit, 'withscores', function(e, set) {
+  client.zrevrange(this.key, 0, bufferedLimit, 'withscores', function(e, set) {
     if (e) {
       d.reject(e);
     } else {
@@ -154,7 +168,7 @@ Set.prototype.fetchRaw = function(opts) {
 
 Set.prototype.updateDecayDate = function(date) {
   var d = when.defer();
-  client.zadd([this.name, date, this.last_decayed_key], function(e, res) {
+  client.zadd([this.key, date, this.last_decayed_key], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
@@ -167,9 +181,10 @@ Set.prototype.updateDecayDate = function(date) {
 Set.prototype.incr = function(opts) {
   var d = when.defer();
   var date = opts.date || Date.now();
+  var self = this;
   when(this.isValidIncrDate(date))
     .then(function() {
-      client.zincrby([this.name, 1, opts.bin], function(e, res) {
+      client.zincrby([self.key, 1, opts.bin], function(e, res) {
         if (e) {
           d.reject(e);
         } else {
@@ -188,7 +203,6 @@ Set.prototype.isValidIncrDate = function(date) {
 
   when(this.getLastDecayDate())
     .then(function(_date) {
-      console.log(_date);
       if (date > _date) {
         d.resolve()
       } else {
@@ -205,13 +219,13 @@ Set.prototype.specialKeys = function() {
 
 Set.prototype.createLifetimeKey = function(date) {
   var d = when.defer();
-  client.zadd([this.name, date, this.lifetime_key], function(e, res) {
+  client.zadd([this.key, date, this.lifetime_key], function(e, res) {
     if (e) {
       d.reject(e);
     } else {
       d.resolve(res);
     }
-  })
+  });
   return d.promise;
 };
 
@@ -226,15 +240,13 @@ exports.create = function(opts) {
 
   var d = when.defer();
   var date = opts['date'] || Date.now();
-  var set = new Set(opts.name);
+  var set = new Set(opts.key);
   when(set.updateDecayDate(date))
     .then(function() {
       when(set.createLifetimeKey(opts.time))
         .then(d.resolve)
         .otherwise(d.reject);
-    }).otherwise(function(e) {
-      console.log('create error', e);
-    });
+    }).otherwise(d.reject);
 
   return d.promise;
 };
@@ -248,10 +260,10 @@ Set.prototype.filterSpecialKeys = function(set, limit) {
   var specialKeys = this.specialKeys();
   var keys = Object.keys(set);
 
-  for (var i=0; i<keys.length; i++) {
-    if (specialKeys[keys[i]]) {
-      delete set[i];
-    } 
+  for (var i=0; i<specialKeys.length; i++) {
+    if (set[specialKeys[i]]) {
+      delete set[specialKeys[i]];
+    }
   }
 
   return set;
@@ -262,21 +274,3 @@ exports.fetch = function(name) {
 };
 
 var set = exports.fetch('follows');
-/*var start = new Date().getTime();
-var max = 1
-var count = 0;
-
-var check = function(i) {
-  if (++count >= max) {
-    console.log('End time ', (new Date().getTime() - start) );
-  }
-}
-*/
-// run a test
-/*when(set.fetch({})).then(function(users) {
-  console.log('users', users);
-  check();
-}).otherwise(function(e) {
-  console.log('Error', e);
-  count();
-});*/
