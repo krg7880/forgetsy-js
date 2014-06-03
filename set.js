@@ -1,6 +1,7 @@
 var when = require('when');
 var connection = require('./connection');
 var client = connection.get();
+var Promise = require('bluebird');
 
 function arrayToObject(arr) {
   var tmp = {};
@@ -22,66 +23,46 @@ var Set = function(key) {
 };
 
 Set.prototype.fetch = function(opts) {
-  var d = when.defer();
   var limit = opts.limit || -1;
-  var decay = opts.decay || true;
-  var scrub = opts.scrub || true;
   var self = this;
-
   var run = function() {
     if (opts.bin) {
-      client.zscore([self.key, opts.bin], function(e, res) {
-        if (e) {
-          d.reject(e);
-        } else {
-          d.resolve(res);
-        }
-      });
+      return client.zscoreAsync([self.key, opts.bin]);
     } else {
-      when(self.fetchRaw({limit: limit}))
-        .then(d.resolve)
-        .otherwise(d.reject);
+      return self.fetchRaw({limit: limit});
     }
   };
 
-  if (decay) {
-    when(this.decay(opts))
+  if (opts.decay) {
+    return this.decay(opts)
       .then(function() {
-        if (scrub) {
-          when(self.scrub(opts))
+        if (opts.scrub) {
+          return self.scrub(opts)
             .then(function() {
-              run();
-            }).otherwise(d.reject);
+              return run();
+            });
+        } else {
+          return run();
         }
-      }).otherwise(d.reject);
+      });
   } else {
-    run();
+    return run();
   }
-
-  return d.promise;
 };
 
 Set.prototype.decay = function(opts) {
   opts = opts || {};
-  var d = when.defer();
-  var t0 = null;
-  var t1 = opts.date || Date.now();
-  var delta = t1 - t0;
-  var rate = null;
   var self = this;
-
-  when(this.getLastDecayDate())
+  return this.getLastDecayDate()
     .then(function(date) {
-      // set the delta
-      t0 = date;
-      delta = t1 - t0;
-      // get the set
-      when(self.fetchRaw())
+      return self.fetchRaw()
         .then(function(set) {
-          // get the lifetime
-          when(self.getLifetime())
-            .then(function(lifetime) {
-              rate = 1 / lifetime;
+          return self.getLifetime()
+            .then(function(lifetime){
+              var t0 = date;
+              var t1 = opts.date || Date.now();
+              var delta = t1 - t0;
+              var rate = 1 / lifetime;
               var multi = client.multi();
 
               for (var i in set) {
@@ -89,130 +70,85 @@ Set.prototype.decay = function(opts) {
                 multi.zadd(self.key, v, i);
               }
 
-              multi.exec(function(e, replies) {
-                if (e) {
-                  d.reject(e);
-                } else {
-                  when(self.updateDecayDate(Date.now()))
-                    .then(d.resolve)
-                    .otherwise(d.reject);
-                }
+              return new Promise(function(resolve, reject) {
+                multi.exec(function(e, replies) {
+                  if (e) {
+                    reject(e);
+                  } else {
+                    return self.updateDecayDate(Date.now());
+                  }
+                });
               });
-            }).otherwise(d.reject);
-        }).otherwise(d.reject);
-    }).otherwise(d.reject);
-
-  return d.promise;
+            });
+        });
+    });
 };
 
 Set.prototype.getLifetime = function() {
-  var d = when.defer();
-  client.zscore([this.key, this.lifetime_key], function(e, lifetime) {
-    if (e) {
-      d.reject(e);
-    } else {
-      d.resolve(lifetime);
-    }
-  });
-  return d.promise;
+  return client.zscoreAsync([this.key, this.lifetime_key]);
 };
 
 Set.prototype.scrub = function() {
-  var d = when.defer();
-  client.zremrangebyscore([this.key, '-inf', this.hi_pass_filter], function(e, res) {
-    if (e) {
-      d.reject(e);
-    } else {
-      d.resolve(res);
-    }
-  });
-
-  return d.promise; 
+  return client.zremrangebyscoreAsync([this.key, '-inf', this.hi_pass_filter]);
 };
 
 Set.prototype.getLastDecayDate = function() {
-  var d = when.defer();
-  client.zscore([this.key, this.last_decayed_key], function(e, res) {
-    if (e) {
-      d.reject(e);
-    } else {
-      d.resolve(res);
-    }
-  });
-  return d.promise;
+  return client.zscoreAsync([this.key, this.last_decayed_key])
+    .then(function(date) {
+      return new Promise(function(resolve, reject) {
+        resolve(parseInt(date, 10));
+      });
+    });
 };
 
 Set.prototype.fetchRaw = function(opts) {
-  var d = when.defer();
   opts = opts || {};
-  var limit = opts.limit || -1;
-  var bufferedLimit = limit;
-  var self = this;
+  var bufferedLimit = limit = opts.limit || -1  
 
   if (limit > 0) {
     bufferedLimit += this.specialKeys().length;
   }
+  
+  var self = this;
 
-  client.zrevrange(this.key, 0, bufferedLimit, 'withscores', function(e, set) {
-    if (e) {
-      d.reject(e);
-    } else {
-      set = arrayToObject(set);
-      set = self.filterSpecialKeys(set);
-      d.resolve(set);
-    }
-  });
-
-  return d.promise;
+  return client.zrevrangeAsync([this.key, 0, bufferedLimit, 'withscores'])
+    .then(function(set) {
+      return new Promise(function(resolve, reject) {
+        if (set.length <= 0) {
+          reject(new Error('No record found!'));
+        } else {
+          set = arrayToObject(set);
+          set = self.filterSpecialKeys(set);
+          resolve(set);
+        }
+      });
+    });
 };
 
 Set.prototype.updateDecayDate = function(date) {
-  var d = when.defer();
-  console.log('updateDecayDate', date);
-  client.zadd([this.key, date, this.last_decayed_key], function(e, res) {
-    if (e) {
-      d.reject(e);
-    } else {
-      d.resolve(res);
-    }
-  });
-  return d.promise;
+  return client.zaddAsync([this.key, date, this.last_decayed_key])
 };
 
 Set.prototype.incr = function(opts) {
-  var d = when.defer();
   var date = opts.date || Date.now();
   var self = this;
   opts.by = opts.by || 1;
-  when(this.isValidIncrDate(date))
-    .then(function() {
-      client.zincrby([self.key, 1, opts.bin], function(e, res) {
-        if (e) {
-          d.reject(e);
-        } else {
-          d.resolve(res);
-        }
-      });
-    }).otherwise(function() {
-      d.reject(new Error('Invalid increment date!'));
-    });
-
-  return d.promise;
+  return this.isValidIncrDate(date).then(function() {
+    return client.zincrby([self.key, 1, opts.bin]);
+  });
 };
 
 Set.prototype.isValidIncrDate = function(date) {
-  var d = when.defer();
-
-  when(this.getLastDecayDate())
-    .then(function(_date) {
-      if (date > _date) {
-        d.resolve()
-      } else {
-        d.reject()
-      }
-    }).otherwise(d.reject);
-
-  return d.promise;
+  return this.getLastDecayDate()
+    .then(function(lastDecayDate) {
+      return new Promise(function(resolve, reject) {
+          if (date > lastDecayDate) {
+            resolve(lastDecayDate);
+          } else {
+            reject(new Error('Invalid increment date!'));
+          }
+      });
+    });
 };
 
 Set.prototype.specialKeys = function() {
@@ -220,50 +156,21 @@ Set.prototype.specialKeys = function() {
 };
 
 Set.prototype.createLifetimeKey = function(date) {
-  var d = when.defer();
-  client.zadd([this.key, date, this.lifetime_key], function(e, res) {
-    if (e) {
-      d.reject(e);
-    } else {
-      d.resolve(res);
-    }
-  });
-  return d.promise;
+  return client.zaddAsync([this.key, date, this.lifetime_key]);
 };
 
-/**
-# @param float opts[time] : mean lifetime of an observation (secs).
-# @param datetime opts[date] : a manual date to start decaying from.
-*/
 exports.create = function(opts) {
   if (!opts['time']) {
     throw new Error('Missing required option: object.time');
   }
 
- /*
   var date = opts['date'] || Date.now();
   var set = new Set(opts.key);
   return set.updateDecayDate(date).then(function() {
-    console.log('Updating decay date');
-    return set.createLifeTimeKey(opts.time);
+    return set.createLifetimeKey(opts.time);
   });
-*/
-  var d = when.defer();
-  when(set.updateDecayDate(date))
-    .then(function() {
-      when(set.createLifetimeKey(opts.time))
-        .then(d.resolve)
-        .otherwise(d.reject);
-    }).otherwise(d.reject);
-
-  return d.promise;
-
 };
 
-/**
-Need to understand better what's going on
-here in Ruby
-*/
 Set.prototype.filterSpecialKeys = function(set, limit) {
   var newSet = {};
   var specialKeys = this.specialKeys();
