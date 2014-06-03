@@ -182,6 +182,7 @@ Set.prototype.incr = function(opts) {
   var d = when.defer();
   var date = opts.date || Date.now();
   var self = this;
+  opts.by = opts.by || 1;
   when(this.isValidIncrDate(date))
     .then(function() {
       client.zincrby([self.key, 1, opts.bin], function(e, res) {

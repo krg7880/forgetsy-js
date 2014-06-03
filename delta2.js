@@ -17,20 +17,44 @@ Delta.prototype.init = function(opts) {
   var d = when.defer();
   var self = this;
   var secondaryDate = Date.now() - ((Date.now() - opts.date) * NORM_T_MULT);
+
   when(Set.create({
     key: this.getPrimaryKey()
     , time: opts.time
     , date: opts.date
-    , name: this.name
   })).then(function() {
     when(Set.create({
       key: self.getSecondaryKey()
       , time: opts.time * NORM_T_MULT
       , date: secondaryDate
-      , name: self.name
     })).then(d.resolve).otherwise(d.reject);
   }).otherwise(d.reject);
 
+  return d.promise;
+};
+
+Delta.prototype.doFetch = function(opts) {
+  var d = when.defer();
+  var self = this;
+  when(this.getSet(opts.primary))
+    .then(function(primarySet) {
+      when(self.getSet(opts.secondary))
+        .then(function(secondarySet) {
+          when(primarySet.fetch(opts))
+            .then(function(count) {
+              when(secondarySet.fetch(opts))
+                .then(function(norm) {
+                  d.resolve({count: count, norm: norm});
+                }).otherwise(d.reject);
+            }).otherwise(function(e) {
+              d.reject(e);
+            });
+        })
+        .otherwise(d.reject);
+    })
+    .otherwise(function(e) {
+      d.reject(e);
+    });
   return d.promise;
 };
 
@@ -46,63 +70,39 @@ Delta.prototype.fetch = function(opts) {
   var self = this;
 
   if (!bin) {
-    when(this.getSet(this.getPrimaryKey()))
-      .then(function(primarySet) {
-        when(self.getSet(self.getSecondaryKey()))
-          .then(function(secondarySet) {
-            when(primarySet.fetch(opts))
-              .then(function(_count) {
-                count = _count;
-                when(secondarySet.fetch(opts))
-                  .then(function(_norm) {
-                    norm = _norm;
-                    value = 0;
-                    var results = [];
-                    for (var i in count) {
-                      var norm_v = norm[i];
-                      var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]) / parseFloat(norm_v).toFixed(2);
-                      results[i] = value;
-                    }
-                    d.resolve(results);
-                  })
-              }).otherwise(function(e) {
-                console.log('Error', e);
-                d.reject(e);
-              });
-          })
-          .otherwise(d.reject);
-      }).otherwise(function(e) {
-        console.log('error', e);
-        d.reject(e);
-      })
+    when(this.doFetch({
+      primary: this.getPrimaryKey()
+      ,secondary: this.getSecondaryKey()
+      ,bin: bin
+    })).then(function(res) {
+      var norm = res.norm;
+      var count = res.count;
+      var value = 0;
+      var results = [];
+      for (var i in count) {
+        var norm_v = norm[i];
+        var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]) / parseFloat(norm_v).toFixed(2);
+        results[i] = parseFloat(value).toFixed(10);
+      }
+      d.resolve(results);
+    }).otherwise(d.reject);
   } else {
-    when(this.getSet(this.getPrimaryKey()))
-      .then(function(primarySet) {
-        when(self.getSet(self.getSecondaryKey()))
-          .then(function(secondarySet) {
-            when(primarySet.fetch(opts))
-              .then(function(_count) {
-                count = _count;
-                when(secondarySet.fetch(opts))
-                  .then(function(_norm) {
-                    norm = _norm;
-                    var results = {};
-                    if (!norm) {
-                      results[bin] = null;
-                    } else {
-                      var norm_v = parseFloat(count) / parseFloat(norm).toFixed(2);
-                      results[bin] = norm_v;
-                    }
-                    d.resolve(results);
-                  })
-              }).otherwise(function(e) {
-                d.reject(e);
-              });
-          })
-          .otherwise(d.reject);
-      }).otherwise(function(e) {
-        d.reject(e);
-      })
+    when(this.doFetch({
+      primary: this.getPrimaryKey()
+      ,secondary: this.getSecondaryKey()
+      ,bin: bin
+    })).then(function(res) {
+      var norm = res.norm;
+      var count = res.count;
+      var results = {};
+      if (!norm) {
+        results[bin] = null;
+      } else {
+        var norm_v = parseFloat(count) / parseFloat(norm).toFixed(2);
+        results[bin] = norm_v;
+      }
+      d.resolve(results);
+    }).otherwise(d.reject);
   }
 
   return d.promise;
@@ -146,6 +146,7 @@ Delta.prototype.incr_by = function(opts) {
     .then(function(sets) {
       var errors = [];
       var count = 0;
+      opts.by = opts.by || 1;
       var check = function() {
         if (++count >= sets.length) {
           if (errors.length > 0) {
@@ -157,7 +158,7 @@ Delta.prototype.incr_by = function(opts) {
       };
       
       sets.forEach(function(i, set) {
-        when(set.incr_by(opts))
+        when(set.incr(opts))
           .then(function(){
             check();
           })
@@ -220,10 +221,6 @@ Delta.prototype.getSecondaryKey = function() {
   return this.name + '_2t';
 };
 
-/**
-@param float opts[t] : mean lifetime of an observation (secs).
-@param datetime opts[date] : a manual date to start decaying from.
-*/
 exports.create = function(opts) {
   var d = when.defer();
   if (!opts.name) {
