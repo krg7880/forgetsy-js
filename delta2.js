@@ -1,7 +1,8 @@
+var Promise = require('bluebird');
 var Set = require('./set2');
-var time = require('./time');
+var time = require('./lib/time');
 var when = require('when');
-var connection = require('./connection');
+var connection = require('./lib/connection');
 var client = connection.get();
 var NORM_T_MULT = 2;
 
@@ -36,6 +37,7 @@ Delta.prototype.init = function(opts) {
 Delta.prototype.doFetch = function(opts) {
   var d = when.defer();
   var self = this;
+
   when(this.getSet(opts.primary))
     .then(function(primarySet) {
       when(self.getSet(opts.secondary))
@@ -60,6 +62,9 @@ Delta.prototype.doFetch = function(opts) {
 
 Delta.prototype.fetch = function(opts) {
   opts = opts || {};
+  opts.decay = (typeof opts.decay == 'undefined') ? true : false;
+  opts.scrub = (typeof opts.scrub == 'undefined') ? true : false;
+
   var d = when.defer();
   var limit = opts.limit || -1;
   delete opts.limit;
@@ -69,29 +74,48 @@ Delta.prototype.fetch = function(opts) {
   var result = null;
   var self = this;
 
+  var fetchOpts = {
+    primary: this.getPrimaryKey()
+    ,secondary: this.getSecondaryKey()
+    ,bin: bin
+    ,scrub: opts.scrub
+    ,decay: opts.decay
+  };
+
   if (!bin) {
-    when(this.doFetch({
-      primary: this.getPrimaryKey()
-      ,secondary: this.getSecondaryKey()
-      ,bin: bin
-    })).then(function(res) {
+    when(this.doFetch(fetchOpts)).then(function(res) {
       var norm = res.norm;
       var count = res.count;
       var value = 0;
       var results = [];
       for (var i in count) {
         var norm_v = norm[i];
-        var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]) / parseFloat(norm_v).toFixed(2);
-        results[i] = parseFloat(value).toFixed(10);
+        var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]).toFixed(count[i].toString().length) / parseFloat(norm_v).toFixed(norm_v.toString().length);
+        results[i] = parseFloat(value).toFixed(value.toString().length);
       }
       d.resolve(results);
     }).otherwise(d.reject);
   } else {
-    when(this.doFetch({
-      primary: this.getPrimaryKey()
-      ,secondary: this.getSecondaryKey()
-      ,bin: bin
-    })).then(function(res) {
+    
+    var promise = when(this.doFetch(fetchOpts));
+    
+    promise.then(function(sets) {
+      var primary = sets.norm;
+      var secondary = sets.count;
+      var results = {};
+      if (!primary) {
+        results[bin] = null
+      } else {
+        var score = parseFloat(secondary).toFixed(secondary.toString().length) / parseFloat(primary).toFixed(primary.toString().length);
+        results[bin] = score;
+      }
+
+      d.resolve(results);
+    });
+
+    promise.otherwise(d.reject);
+    /*
+    when(this.doFetch(fetchOpts)).then(function(res) {
       var norm = res.norm;
       var count = res.count;
       var results = {};
@@ -103,6 +127,7 @@ Delta.prototype.fetch = function(opts) {
       }
       d.resolve(results);
     }).otherwise(d.reject);
+*/
   }
 
   return d.promise;
@@ -130,7 +155,6 @@ Delta.prototype.incr = function(opts) {
             check();
           })
           .otherwise(function(e) {
-            console.log('E', e);
             errors.push(e);
             check();
           })
@@ -238,6 +262,7 @@ exports.create = function(opts) {
     .then(function() {
       d.resolve(delta);
     }).otherwise(d.reject);
+
   return d.promise;
 };
 

@@ -1,5 +1,5 @@
 var when = require('when');
-var connection = require('./connection');
+var connection = require('./lib/connection');
 var client = connection.get();
 
 function arrayToObject(arr) {
@@ -23,8 +23,6 @@ var Set = function(key) {
 
 Set.prototype.fetch = function(opts) {
   var limit = opts.limit || -1;
-  var decay = opts.decay || true;
-  var scrub = opts.scrub || true;
   var self = this;
   var run = function() {
     if (opts.bin) {
@@ -38,22 +36,20 @@ Set.prototype.fetch = function(opts) {
       });
       return d.promise;
     } else {
-      return when(self.fetchRaw({limit: limit}))
-        //.then(d.resolve)
-        //.otherwise(d.reject);
+      return when(self.fetchRaw({limit: limit}));
     }
   };
 
-  if (decay) {
-    return when(this.decay(opts))
-      .then(function() {
-        if (scrub) {
-          return when(self.scrub(opts))
-            .then(function() {
-              return run();
-            })//.otherwise(d.reject);
-        }
-      })//.otherwise(d.reject);
+  if (opts.decay) {
+    var promise = when(this.decay(opts));
+    return promise.then(function() {
+      if (opts.scrub) {
+        var promise = when(self.scrub(opts));
+        return promise.then(function() {
+          return run();
+        });
+      }
+    });
   } else {
     return run();
   }
@@ -167,12 +163,11 @@ Set.prototype.fetchRaw = function(opts) {
 
 Set.prototype.updateDecayDate = function(date) {
   var d = when.defer();
-  console.log('updateDecayDate', new Date(date));
   client.zadd([this.key, date, this.last_decayed_key], function(e, res) {
+    console.log('updateDecayDate', e, res);
     if (e) {
       d.reject(e);
     } else {
-      console.log('RES', e, res);
       d.resolve(res);
     }
   });
@@ -205,7 +200,6 @@ Set.prototype.isValidIncrDate = function(date) {
 
   when(this.getLastDecayDate())
     .then(function(_date) {
-      console.log(new Date(date), new Date(_date));
       if (date > _date) {
         d.resolve()
       } else {
@@ -245,7 +239,6 @@ exports.create = function(opts) {
   var date = opts['date'] || Date.now();
   var set = new Set(opts.key);
   return set.updateDecayDate(date).then(function() {
-    console.log('update decay date', new Date(date));
     return set.createLifetimeKey(opts.time);
   });
 

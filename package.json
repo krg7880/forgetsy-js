@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "redis": "*",
-    "hiredis": "*"
+    "hiredis": "*",
+    "bluebird": "*"
   },
   "devDependencies": {
   },

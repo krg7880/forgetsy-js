@@ -1,50 +1,66 @@
-var Delta = require('./delta2');
-var time = require('./time');
-var when = require('when');
-var start = new Date().getTime();
+var Promise = require('es6-promise').Promise;
+var connection = require('./lib/connection');
+var client = connection.get();
+var Delta = require('./lib/delta');
+var time = require('./lib/time');
+var start;
 var max = 1;
 var count = 0;
+var category = 'member';
+var bin = 'Train';
 
 function fetch() {
-  when(Delta.fetch('member'))
+  var promise = Delta.fetch(category);
+
+  promise.then(function(delta) {
+    var trending = delta.fetch();
+    trending.then(function(trends) {
+      if (++count >= max) {
+        console.log('Trending', trends, 'test completed in ', (new Date().getTime() - start) + 'ms');
+      }
+    })
+  })
+
+  return Delta.fetch(category)
     .then(function(delta) {
-      when(delta.fetch({date: time.day()}))
-        .then(function(users) {
-          
-          console.log('users', users, 'end');
-          if (++count >= max) {
-            console.log('end', (new Date().getTime() - start).toString());
-          }
-        }).otherwise(function(e) {
-          console.log('error fetching users', e);
-        });
-    }).otherwise(function(e) {
-      console.log('Error fetching delta');
+      return delta.fetch({}).then(function(trends) {
+        console.log('Trends', trends);
+        if (++count >= max) {
+          console.log('end', (new Date().getTime() - start).toString());
+          process.exit();
+        }
+      }).catch(function(e) {
+        console.log('Error fetching trends', e);
+      })
+    }).catch(function(e) {
+      console.log('Error fetching category', e);
     });
 };
 
 function run() {
-  when(Delta.create({name: 'member', time: time.day()}))
-  .then(function(delta) {
-
-    // fetch the member delta
-    when(Delta.fetch('member'))
-      .then(function(delta) {
-        when(delta.incr({bin: 'Kirk', by: 1}))
-          .then(function() {
-            fetch();
-          }).otherwise(function(e) {
-            console.log('Error incrementing user');
-          })
-      }).otherwise(function(e) {
-        console.log('Error fetching delta', e);
-      });
-
-  }).otherwise(function(e) {
-    console.log('Delta Error', e);
+  var promise = Delta.create({
+    name: category
+    ,time: time.week()
   });
-}
 
+  promise.then(function(delta) {
+    var promise = delta.incr({
+      bin: bin
+      ,by: 1
+    });
+
+    //promise.then(fetch);
+    //promise.catch(function(e) {
+    //  console.log('Increment error', e);
+    //})
+  });
+
+  promise.catch(function(e) {
+    console.log('Create error');
+  })
+};
+
+start = new Date().getTime();
 for (var i=0; i<max; i++) {
   fetch();
 }
