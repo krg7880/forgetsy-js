@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+
+INDEX=${PWD}/server.js
+#INDEX=${PWD}/es6.js
+
+if [ -f ${INDEX} ]; then
+	echo "Starting program..."
+	node ${INDEX}
+else
+	echo "${INDEX} is not a file..."
+fi

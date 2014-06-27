@@ -1,6 +1,8 @@
 var when = require('when');
 var connection = require('./lib/connection');
 var client = connection.get();
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 function arrayToObject(arr) {
   var tmp = {};
@@ -14,49 +16,40 @@ function arrayToObject(arr) {
   return tmp;
 }
 
-var Set = function(key) {
+
+var Bin = function(key) {
+  Bin.super_.call(this);
   this.key = key;
   this.last_decayed_key = '_last_decay';
   this.lifetime_key = '_t';
   this.hi_pass_filter = 0.0001;
 };
 
-Set.prototype.fetch = function(opts) {
-  var limit = opts.limit || -1;
+util.inherits(Bin, EventEmitter);
+
+Bin.prototype.fetch = function(options) {
+  var limit = options.limit || -1;
   var self = this;
-  var run = function() {
-    if (opts.bin) {
-      var d = when.defer();
-      client.zscore([self.key, opts.bin], function(e, res) {
-        if (e) {
-          d.reject(e);
-        } else {
-          d.resolve(res);
-        }
-      });
-      return d.promise;
+
+  this.on('decay_complete', function(evt) {
+    self.scrub(options);
+  }).on('scrub_complete', function(evt) {
+    if (options.bin) {
+      this.getBin({bin: options.bin});
     } else {
-      return when(self.fetchRaw({limit: limit}));
+      this.getAll({limit: limit});
     }
-  };
+  });
 
-  if (opts.decay) {
-    var promise = when(this.decay(opts));
-    return promise.then(function() {
-      if (opts.scrub) {
-        var promise = when(self.scrub(opts));
-        return promise.then(function() {
-          return run();
-        });
-      }
-    });
-  } else {
-    return run();
-  }
-
+  this.decay(options);
 };
 
 Set.prototype.decay = function(opts) {
+  if (!options.decay) {
+    this.emit('decay_complete', {});
+    return;
+  } 
+  
   opts = opts || {};
   var d = when.defer();
   var t0 = null;
@@ -226,23 +219,6 @@ Set.prototype.createLifetimeKey = function(date) {
 };
 
 /**
-# @param float opts[time] : mean lifetime of an observation (secs).
-# @param datetime opts[date] : a manual date to start decaying from.
-*/
-exports.create = function(opts) {
-  if (!opts['time']) {
-    throw new Error('Missing required option: object.time');
-  }
-
-  //var d = when.defer();
-  var date = opts['date'] || Date.now();
-  var set = new Set(opts.key);
-  return set.updateDecayDate(date).then(function() {
-    return set.createLifetimeKey(opts.time);
-  });
-};
-
-/**
 Need to understand better what's going on
 here in Ruby
 */
@@ -260,8 +236,35 @@ Set.prototype.filterSpecialKeys = function(set, limit) {
   return set;
 };
 
-exports.fetch = function(name) {
-  return new Set(name);
+
+
+var BinFactory = function() {
+  BinFactory.super_.call(this);
 };
 
-var set = exports.fetch('follows');
+util.inherits(BinFactory, EventEmitter);
+
+/**
+# @param float opts[time] : mean lifetime of an observation (secs).
+# @param datetime opts[date] : a manual date to start decaying from.
+*/
+BinFactory.prototype.create = function(options) {
+  if (!options.time) {
+    self.emit('error', new Error('Missing mean lifetime: options.time'));
+    return;
+  } 
+
+  var date = options.date || Date.now();
+  var bin = new Bin(options.key);
+  bin.on('decay_date_updated', function(evt) {
+    bin.createLifetimeKey(options.time);
+  }).on('create_lifetime_key', function(evt) {
+    self.emit('create_complete');
+  })
+};
+
+BinFactory.prototype.fetch = function(name) {
+  return new Bin(name);
+};
+
+module.exports = BinFactory;

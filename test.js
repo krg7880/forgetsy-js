@@ -4,10 +4,10 @@ var client = connection.get();
 var Delta = require('./lib/delta');
 var time = require('./lib/time');
 var start;
-var max = 1;
+var max = 100;
 var count = 0;
 var category = 'member';
-var bin = 'Train';
+var bin = 'Camp';
 
 function fetch() {
   var promise = Delta.fetch(category);
@@ -23,10 +23,9 @@ function fetch() {
 
   return Delta.fetch(category)
     .then(function(delta) {
-      return delta.fetch({}).then(function(trends) {
-        console.log('Trends', trends);
+      return delta.fetch().then(function(trends) {
         if (++count >= max) {
-          console.log('end', (new Date().getTime() - start).toString());
+          console.log('end', (new Date().getTime() - start).toString(), trends);
           process.exit();
         }
       }).catch(function(e) {
@@ -49,10 +48,10 @@ function run() {
       ,by: 1
     });
 
-    //promise.then(fetch);
-    //promise.catch(function(e) {
-    //  console.log('Increment error', e);
-    //})
+    promise.then(fetch);
+    promise.catch(function(e) {
+      console.log('Increment error', e);
+    })
   });
 
   promise.catch(function(e) {

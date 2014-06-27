@@ -1,20 +1,23 @@
 var Delta = require('./delta2');
 var time = require('./lib/time');
 var when = require('when');
-var max = 1;
+var max = 10000;
 var count = 0;
 var category = 'shares';
 var start;
 
 function fetch() {
+  console.log('fetching');
   var promise = when(Delta.fetch(category));
 
   promise.then(function(delta) {
     var fetchPromise = when(delta.fetch({date: time.week()}));
 
     fetchPromise.then(function(trends) {
+      console.log('Fetch', trends);
       if (++count >= max) 
-        console.log('Trending', trends, 'test completed in ', (new Date().getTime() - start) + 'ms');
+        console.log('kirk', trends, 'test completed in ', (new Date().getTime() - start) + 'ms');
+        process.exit();
     });
 
     fetchPromise.otherwise(function(e) {
@@ -35,7 +38,7 @@ function run() {
 
   promise.then(function(delta) {
     var promise = when(delta.incr({
-      bin: 'Train'
+      bin: 'kirk'
       ,by: 1
     }));
 
