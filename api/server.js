@@ -3,34 +3,34 @@ var Delta = require(__dirname + '/delta');
 var time = require(__dirname + '/time');
 
 function onCreate(req, res, next) {
-	Delta.create({
+  Delta.create({
     name: req.params.category
     ,time: req.params.time || time.week()
   }, function(e, delta) {
-  	if (e) {
-  		res.send('Error creating entry!');
-  	} else {
-  		res.send('Entry was created');
-  	}
+    if (e) {
+      res.send('Error creating entry!');
+    } else {
+      res.send('Entry was created');
+    }
 
-  	next();
+    next();
   });
 }
 
 function onIncrement(req, res, next) {
-	Delta.get(req.params.category, function(e, delta) {
-		if (e) {
-			return res.send('Error getting delta');
-		}
+  Delta.get(req.params.category, function(e, delta) {
+    if (e) {
+      return res.send('Error getting delta');
+    }
 
     delta.incr({
       bin: req.params.bin
       ,by: req.params.by || 1
     }, function(e) {
       if (e) {
-      	res.send('Error incrementing bin: ' + req.params.bin);
+        res.send('Error incrementing bin: ' + req.params.bin);
       } else {
-      	res.send('Bin was successfully incremented: ' + req.params.bin);
+        res.send('Bin was successfully incremented: ' + req.params.bin);
       }
 
       next();
@@ -39,24 +39,24 @@ function onIncrement(req, res, next) {
 }
 
 function onFetch(req, res, next) {
-	Delta.get(req.params.category, function(e, delta) {
-		var opts = {};
-		if (req.params.bin) {
-			opts.bin = req.params.bin
-		}
+  Delta.get(req.params.category, function(e, delta) {
+    var opts = {};
+    if (req.params.bin) {
+      opts.bin = req.params.bin
+    }
 
-		if (req.query.date) {
-			opts.date = time[req.query.date]();
-		}
+    if (req.query.date) {
+      opts.date = time[req.query.date]();
+    }
 
-		console.log(opts);
+    console.log(opts);
 
     delta.fetch(opts, function(e, trends) {
       if (e) {
-      	res.send('Error fetching bin: ' + req.params.bin);
+        res.send('Error fetching bin: ' + req.params.bin);
       } else {
-      	res.send(JSON.stringify(trends));
-      	next();
+        res.send(JSON.stringify(trends));
+        next();
       }
     });
   });
