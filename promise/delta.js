@@ -40,12 +40,16 @@ Delta.prototype.doFetch = function(opts) {
 
   when(this.getSet(opts.primary))
     .then(function(primarySet) {
+      console.log('got primary set');
       when(self.getSet(opts.secondary))
         .then(function(secondarySet) {
+          console.log('got secondary set');
           when(primarySet.fetch(opts))
             .then(function(count) {
+              console.log('got primary count', count)
               when(secondarySet.fetch(opts))
                 .then(function(norm) {
+                  console.log('got secondary count', count);
                   d.resolve({count: count, norm: norm});
                 }).otherwise(d.reject);
             }).otherwise(function(e) {
@@ -61,6 +65,7 @@ Delta.prototype.doFetch = function(opts) {
 };
 
 Delta.prototype.fetch = function(opts) {
+
   opts = opts || {};
   opts.decay = (typeof opts.decay == 'undefined') ? true : false;
   opts.scrub = (typeof opts.scrub == 'undefined') ? true : false;
@@ -84,6 +89,7 @@ Delta.prototype.fetch = function(opts) {
 
   if (!bin) {
     when(this.doFetch(fetchOpts)).then(function(res) {
+      console.log('fetched...')
       var norm = res.norm;
       var count = res.count;
       var value = 0;
@@ -93,10 +99,12 @@ Delta.prototype.fetch = function(opts) {
         var value = (typeof norm_v === 'undefined') ? 0 : parseFloat(count[i]).toFixed(count[i].toString().length) / parseFloat(norm_v).toFixed(norm_v.toString().length);
         results[i] = parseFloat(value).toFixed(value.toString().length);
       }
+
+      console.log('Results', results);
       d.resolve(results);
     }).otherwise(d.reject);
   } else {
-    
+    console.log('Bin fetch!');
     var promise = when(this.doFetch(fetchOpts));
     
     promise.then(function(sets) {
@@ -114,20 +122,6 @@ Delta.prototype.fetch = function(opts) {
     });
 
     promise.otherwise(d.reject);
-    /*
-    when(this.doFetch(fetchOpts)).then(function(res) {
-      var norm = res.norm;
-      var count = res.count;
-      var results = {};
-      if (!norm) {
-        results[bin] = null;
-      } else {
-        var norm_v = parseFloat(count) / parseFloat(norm).toFixed(2);
-        results[bin] = norm_v;
-      }
-      d.resolve(results);
-    }).otherwise(d.reject);
-*/
   }
 
   return d.promise;

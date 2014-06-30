@@ -4,7 +4,7 @@ var client = connection.get();
 var Delta = require('./lib/delta');
 var time = require('./lib/time');
 var start;
-var max = 100;
+var max = 1000;
 var count = 0;
 var category = 'member';
 var bin = 'Camp';
@@ -15,6 +15,7 @@ function fetch() {
   promise.then(function(delta) {
     var trending = delta.fetch();
     trending.then(function(trends) {
+      console.log('trends', trends);
       if (++count >= max) {
         console.log('Trending', trends, 'test completed in ', (new Date().getTime() - start) + 'ms');
       }
@@ -61,5 +62,5 @@ function run() {
 
 start = new Date().getTime();
 for (var i=0; i<max; i++) {
-  fetch();
+  run();
 }

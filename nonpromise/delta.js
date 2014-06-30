@@ -165,6 +165,7 @@ Delta.prototype.getSets = function(cb) {
     if (e) {
       return cb(e);
     }
+    
     sets.push(set);
     self.getSet(self.getSecondaryKey(), function(e, set) {
       if (e) {
