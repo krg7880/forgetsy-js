@@ -1,15 +1,16 @@
 var env = process.env;
 var restify = require('restify');
 var fs = require('fs');
-var Delta = require(__dirname + '/delta');
-var time = require(__dirname + '/time');
+var path = require('path');
+var Delta = require(path.resolve(__dirname + '/lib/delta'));
+var time = require(path.resolve(__dirname + '/lib/time'));
 var cluster = require('cluster');
 var cpus = require('os').cpus().length;
 var workers = [];
 var sigint = false;
 var logger = console;
 
-env.APP_PID = __dirname + '/master.pid';
+env.APP_PID = path.resolve(__dirname + '/master.pid');
 
 function onCreate(req, res, next) {
   var time = req.query.time ? 

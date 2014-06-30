@@ -9,7 +9,7 @@
   "dependencies": {
     "redis": "*",
     "hiredis": "*",
-    "bluebird": "*"
+    "restify": "*"
   },
   "devDependencies": {
   },
