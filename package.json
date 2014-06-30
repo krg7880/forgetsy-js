@@ -1,20 +1,24 @@
 {
   "name": "forgetsy-js",
-  "version": "0.0.0",
-  "description": "Forgetsy.js is a scalable trending library designed to track temporal trends in non-stationary categorical distributions",
+  "version": "0.3.1",
+  "description": "Forgetsy.js is a scalable trending library designed to track temporal trends in non-stationary categorical distributions. NodeJS fork of https://github.com/cavvia/forgetsy.",
   "main": "index.js",
+  "repository": "git://github.com/kirk7880/forgetsy-js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "redis": "*",
-    "hiredis": "*",
-    "restify": "*",
-    "datejs": "*"
+    "hiredis": "*"
   },
   "devDependencies": {
     "moment": "*"
   },
+  "keywords": [
+    "trend"
+    ,"trends"
+    ,"trending"
+  ],
   "author": "Kirk Gordon<kirk7880@gmail.com>",
-  "license": "ISC"
+  "license": "MIT"
 }

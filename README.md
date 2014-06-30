@@ -1,7 +1,7 @@
 forgetsy-js
 ===========
 
-Nodejs fork of https://github.com/cavvia/forgetsy temporial trending framework. This is still work in progress and needs proper testing so it may contain bugs. The long term goal is to create a RESTFul API. The project use Redis as the backend. 
+Nodejs fork of https://github.com/cavvia/forgetsy temporial trending framework. This is still work in progress and needs proper testing and still undergoing heavy development. If you discover an issue, please open a ticket to have it resolved or fork and fix :-) The long term goal is to create a RESTFul API. The project use Redis as the backend. 
 
 Please fork and make it better.
 

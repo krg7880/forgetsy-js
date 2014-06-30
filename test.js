@@ -2,13 +2,13 @@ var Delta = require(__dirname + '/lib/delta');
 var moment = require('moment');
 
 var category = 'shares';
-var bin = 'video';
+var bin = 'trend';
 
 Delta.create({
   name: category
   ,time: moment().week()
 }, function(e, delta) {
-  delta.foo = 'bar';
+  delta.foo = bin
   console.log(e);
   // increment a new bin
   delta.incr({
