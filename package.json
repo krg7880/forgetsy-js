@@ -1,5 +1,5 @@
 {
-  "name": "forgetsy.js",
+  "name": "forgetsy-js",
   "version": "0.0.0",
   "description": "Forgetsy.js is a scalable trending library designed to track temporal trends in non-stationary categorical distributions",
   "main": "index.js",
