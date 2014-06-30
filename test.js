@@ -8,6 +8,7 @@ Delta.create({
   name: category
   ,time: moment().week()
 }, function(e, delta) {
+  delta.foo = 'bar';
   console.log(e);
   // increment a new bin
   delta.incr({
