@@ -5,7 +5,7 @@ INDEX=${PWD}/server.js
 
 if [ -f ${INDEX} ]; then
 	echo "Starting program..."
-	node ${INDEX}
+	node --trace-deopt ${INDEX}
 else
 	echo "${INDEX} is not a file..."
 fi

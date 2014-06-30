@@ -7,6 +7,8 @@ var Delta = function(name) {
     return new Delta(name);
   }
 
+  this.uuid = new Date().getTime() + (Math.random() * 1000)
+  console.log('Creating delta', this.uuid);
   this.name = name;
 };
 
@@ -163,7 +165,6 @@ Delta.prototype.getSets = function(cb) {
     if (e) {
       return cb(e);
     }
-
     sets.push(set);
     self.getSet(self.getSecondaryKey(), function(e, set) {
       if (e) {
@@ -200,10 +201,13 @@ exports.create = function(o, cb) {
 
 exports.get = function(name, cb) {
   var delta = new Delta(name);
-  delta.exists(name, function(e, exists) {
-    if (!exists) {
-      cb(new Error('Delta does not exists'));
-    }
-    cb(null, delta);
-  });
+  (function(cb, delta) {
+    delta.exists(name, function(e, exists) {
+      if (!exists || e) {
+        return cb(new Error('Delta does not exists'))
+      }
+
+      cb(null, delta);
+    });
+  })(cb, delta);
 };

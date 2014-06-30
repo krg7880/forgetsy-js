@@ -1,10 +1,10 @@
-let Delta = require(__dirname + '/delta');
-let time = require(__dirname + '/time');
+var Delta = require(__dirname + '/delta');
+var time = require(__dirname + '/time');
 
-//let count = 2;  
-let category = 'shares';
+//var count = 2;  
+var category = 'shares';
 
-let increment = function(delta) {
+var increment = function(delta) {
   delta.incr({
     bin: 'kirk'
     ,by: 1
@@ -17,39 +17,31 @@ let increment = function(delta) {
   });
 };
 
-let i=0;
-
-let delta = null;
-
-let get = function(cb) {
-  /*delta.fetch({
-    bin: 'kirk'
-  }, function(e, res) {
-
-    console.log('res', res)
-    cb()
-  });*/
+var get = function(cb) {
   Delta.get(category, function(e, delta) {
-    delta.fetch({
-      bin: 'Train'
-    }, function(e, res) {
-      console.log(res);
-      delta.incr({
+    (function(delta) {
+      console.log('Delta!', delta.uuid);
+      delta.fetch({
         bin: 'Train'
-        ,by: 1
-      }, function(e) {
-        delta.fetch({
-          date: time.week()
-        }, function(e, res) {
-          console.log('increment', res);
-          cb();
-        })
+      }, function(e, res) {
+        console.log(res);
+        delta.incr({
+          bin: 'Train'
+          ,by: 1
+        }, function(e) {
+          delta.fetch({
+            date: time.week()
+          }, function(e, res) {
+            console.log('increment', res);
+            cb();
+          })
+        });
       });
-    });
+    })(delta);
   });
 };
 
-let create = function() {
+var create = function() {
   Delta.create({
     name: category
     ,time: time.week()
@@ -58,9 +50,9 @@ let create = function() {
   });
 };
 
-let max = 10000;
-let count = 0;
-let run = function() {
+var max = 10000;
+var count = 0;
+var run = function() {
   get(function() {
     if (++count >= max) {
       process.exit();
@@ -72,13 +64,14 @@ let run = function() {
 
 //run();
 
-Delta.get(category, function(e, _delta) {
-  delta = _delta;
-  for (let i=0; i<max; i++) {
-    get(function() {
-      if (i >= max) {
-        process.exit();
-      }
-    });
+//Delta.get(category, function(e, _delta) {
+  //delta = _delta;
+  for (var i=0; i<max; i++) {
+    console.log(i, String(new Date().getTime()))
+    //get(function() {
+     // if (i >= max) {
+     //   process.exit();
+    //  }
+    //});
   }
-})
+//})

@@ -8,6 +8,9 @@ var HI_PASS_FILTER = 0.0001;
 
 
 var Set = function(key) {
+  if (!this instanceof Set) {
+    return new Set(key);
+  }
   this.key = key;
 };
 
@@ -141,7 +144,7 @@ Set.prototype.incr = function(o, cb) {
 
     var cmd = [self.key, o.by, o.bin];
     client.zincrby(cmd, cb);
-  })
+  });
 };
 
 Set.prototype.isValidIncrDate = function(date, cb) {
@@ -180,7 +183,6 @@ Set.prototype.createLifetimeKey = function(date, cb) {
 };
 
 
-///////////
 
 /**
 # @param float opts[time] : mean lifetime of an observation (secs).
