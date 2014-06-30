@@ -13,6 +13,7 @@
     "datejs": "*"
   },
   "devDependencies": {
+    "moment": "*"
   },
   "author": "",
   "license": "ISC"

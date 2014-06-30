@@ -1,17 +1,14 @@
 var Delta = require(__dirname + '/lib/delta');
-var time = require(__dirname + '/lib/time');
-var Datejs = require('datejs');
+var moment = require('moment');
 
-console.log(Datejs.today())
-
-//var count = 2;  
 var category = 'shares';
 var bin = 'video';
 
 Delta.create({
   name: category
-  ,time: time.week()
+  ,time: moment().week()
 }, function(e, delta) {
+  console.log(e);
   // increment a new bin
   delta.incr({
     bin: bin
@@ -19,7 +16,6 @@ Delta.create({
   }, function(e) {
     // fetch all item
     delta.fetch({
-      date: time.week()
     }, function(e, trends) {
       console.log('trends', trends);
     })
