@@ -1,7 +1,7 @@
 forgetsy-js
 ===========
 
-Nodejs fork of https://github.com/cavvia/forgetsy temporial trending framework. This is still work in progress and needs proper testing. Please fork and make it better.
+Nodejs fork of https://github.com/cavvia/forgetsy temporial trending framework. This is still work in progress and needs proper testing so it may contain bugs. The long term goal is to create a RESTFul API. Please fork and make it better.
 
 ```
 var Delta = require(__dirname + '/lib/delta');
