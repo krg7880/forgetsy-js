@@ -9,7 +9,8 @@
   "dependencies": {
     "redis": "*",
     "hiredis": "*",
-    "restify": "*"
+    "restify": "*",
+    "datejs": "*"
   },
   "devDependencies": {
   },
