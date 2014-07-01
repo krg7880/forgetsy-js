@@ -2,7 +2,7 @@ var Delta = require(__dirname + '/lib/delta');
 var moment = require('moment');
 
 var delta = 'shares';
-var bin = 'my-content-id';
+var bin = 'trendly';
 
 // @todo - integrate convenient date lib
 function getDays(days) {
@@ -27,6 +27,8 @@ function createAndIncrement(cb) {
   });
 }
 
+var max = 10000;
+var count = 0;
 function fetch() {
   Delta.get(delta, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
@@ -34,12 +36,17 @@ function fetch() {
     delta.fetch({date: getDays(1)}, function(e, trends) {
       if (e) return console.log('Error fetching all trends in ' + delta);
       console.log('Trends', trends);
+      if (++count >= max) {
+        process.exit();
+      }
     })
   })
 }
 
-// create a delta and a bin
+for (var i=0; i<max; i++ ) {
+  // create a delta and a bin
 createAndIncrement(fetch);
+}
 
 // fetches the trending content
 //fetch();
