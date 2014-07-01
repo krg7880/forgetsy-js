@@ -5,19 +5,19 @@ Nodejs fork of https://github.com/cavvia/forgetsy temporal trending framework. T
 
 Please fork and make it better.
 
-==== Import Delta
+#### Import Delta
 
 ```javascript
 var Delta = require(__dirname + '/lib/delta');
 ```
 
-==== Define delta to create
+#### Define delta to create
 ```javascript
 var delta = 'shares';
 var bin = 'my-content-id';
 ```
 
-===== Create, increment and fetch the trends 
+##### Create, increment and fetch the trends 
 ```javascript
 // @todo - integrate convenient date lib
 function getDays(days) {
