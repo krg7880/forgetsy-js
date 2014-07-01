@@ -4,6 +4,7 @@ var moment = require('moment');
 var delta = 'shares';
 var bin = 'my-content-id';
 
+// @todo - integrate convenient date lib
 function getDays(days) {
   return (new Date().getTime() + ((60 * 60 * 24 * 1000) * days));
 }
@@ -37,5 +38,8 @@ function fetch() {
   })
 }
 
+// create a delta and a bin
 createAndIncrement(fetch);
+
+// fetches the trending content
 //fetch();
