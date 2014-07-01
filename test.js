@@ -1,8 +1,7 @@
 var Delta = require(__dirname + '/lib/delta');
-var moment = require('moment');
 
-var delta = 'shares';
-var bin = 'trendly';
+var dist = 'shares';
+var bin = 'test';
 
 // @todo - integrate convenient date lib
 function getDays(days) {
@@ -11,7 +10,7 @@ function getDays(days) {
 
 function createAndIncrement(cb) {
   Delta.create({
-    name: delta
+    name: dist
     ,time: getDays(7)
   }, function(e, delta) {
     if (e) return console.log('Error creating delta', e);
@@ -27,26 +26,31 @@ function createAndIncrement(cb) {
   });
 }
 
-var max = 10000;
-var count = 0;
-function fetch() {
-  Delta.get(delta, function(e, delta) {
+
+function fetchAll() {
+  Delta.get(dist, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
 
     delta.fetch({date: getDays(1)}, function(e, trends) {
-      if (e) return console.log('Error fetching all trends in ' + delta);
+      if (e) return console.log('Error fetching all trends in ' + dist);
       console.log('Trends', trends);
-      if (++count >= max) {
-        process.exit();
-      }
-    })
-  })
+    });
+  });
 }
 
-for (var i=0; i<max; i++ ) {
-  // create a delta and a bin
-createAndIncrement(fetch);
+function fetchOne() {
+  Delta.get(dist, function(e, delta) {
+    if (e) return console.log('Delta does not exists', e);
+
+    delta.fetch({bin: 'test', date: getDays(1)}, function(e, trends) {
+      if (e) return console.log('Error fetching all trends in ' + dist);
+      console.log('Trends', trends);
+    });
+  });
 }
+
+// create a delta and a bin
+createAndIncrement(fetch);
 
 // fetches the trending content
 //fetch();

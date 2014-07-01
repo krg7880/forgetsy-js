@@ -13,7 +13,7 @@ var Delta = require(__dirname + '/lib/delta');
 
 #### Define delta to create
 ```javascript
-var delta = 'shares';
+var dist = 'shares';
 var bin = 'my-content-id';
 ```
 
@@ -26,7 +26,7 @@ function getDays(days) {
 
 function createAndIncrement(cb) {
   Delta.create({
-    name: delta
+    name: dist
     ,time: getDays(7)
   }, function(e, delta) {
     if (e) return console.log('Error creating delta', e);
@@ -43,11 +43,11 @@ function createAndIncrement(cb) {
 }
 
 function fetch() {
-  Delta.get(delta, function(e, delta) {
+  Delta.get(dist, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
 
     delta.fetch({date: getDays(1)}, function(e, trends) {
-      if (e) return console.log('Error fetching all trends in ' + delta);
+      if (e) return console.log('Error fetching all trends in ' + dist);
       console.log('Trends', trends);
     })
   })
