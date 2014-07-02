@@ -61,7 +61,7 @@ function fetchAll() {
   Delta.get(dist, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
 
-    delta.fetch({date: getDays(1)}, function(e, trends) {
+    delta.fetch({}, function(e, trends) {
       if (e) return console.log('Error fetching all trends in ' + dist);
       process.exit()
     });
@@ -72,8 +72,8 @@ function fetchOne() {
   Delta.get(dist, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
 
-    delta.fetch({bin: 'test', date: getDays(1)}, function(e, trends) {
-      if (e) return console.log('Error fetching all trends in ' + dist);
+    delta.fetch({bin: bin}, function(e, trends) {
+      if (e) return console.log('Error fetching a single bin in ' + dist);
       console.log('Trends', trends);
     });
   });
