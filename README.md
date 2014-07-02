@@ -80,7 +80,7 @@ create(fetchAll);
 //fetchOne();
 ```
 
-==== Example output
+#### Example output
 ```json
 { 
 	itemTwo: 0.999999999997154
@@ -88,12 +88,10 @@ create(fetchAll);
 }
 ```
 
-==== Simple test
-
+#### Simple test
 npm test
 
-==== Simple Benchmark
-
+##### Simple Benchmark
 Iterations: 10,000
 Operations: create, increment, fetch
 
