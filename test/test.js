@@ -46,8 +46,9 @@ function fetchAll() {
 
     delta.fetch({date: getDays(1)}, function(e, trends) {
       if (e) return console.log('Error fetching all trends in ' + dist);
-      if (++count >= max)
-        process.exit()
+      console.log('Fetch all', trends);
+      //if (++count >= max)
+      //  process.exit()
     });
   });
 }
@@ -64,6 +65,7 @@ function fetchOne() {
 }
 
 
+create(fetchAll);
 create(fetchOne);
 
 // fetches a single index

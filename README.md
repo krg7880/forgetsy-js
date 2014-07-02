@@ -1,14 +1,16 @@
 forgetsy-js
 ===========
 
-Nodejs fork of https://github.com/cavvia/forgetsy temporal trending library. This is still work in progress and needs proper testing and still undergoing heavy development. If you discover an issue, please open a ticket to have it resolved or fork and fix :-) The project use Redis as the backend. 
+Nodejs fork of [Forgetsy](https://github.com/cavvia/forgetsy) temporal trending library. This is still work in progress and needs proper testing and still undergoing heavy development. If you discover an issue, please open a ticket to have it resolved or fork and fix :-) The project use [Redis](https://github.com/antirez/redis) as the backend. 
 
 Please fork and make it better.
 
-#### Installation
+Installation
+------------
 npm install forgetsy-js
 
-#### Import Delta
+Usage
+-----
 
 ```javascript
 var Delta = require('forgetsy-js').Delta;
