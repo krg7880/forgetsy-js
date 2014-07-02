@@ -36,7 +36,7 @@ function create(cb) {
   });
 }
 
-var max = 100000;
+var max = 1;
 var count = 0;
 
 // fetch all trending items
@@ -56,7 +56,7 @@ function fetchOne() {
   Delta.get(dist, function(e, delta) {
     if (e) return console.log('Delta does not exists', e);
 
-    delta.fetch({bin: 'test', date: getDays(1)}, function(e, trends) {
+    delta.fetch({bin: bin, date: getDays(1)}, function(e, trends) {
       if (e) return console.log('Error fetching all trends in ' + dist);
       console.log('Trends', trends);
     });
@@ -65,7 +65,7 @@ function fetchOne() {
 
 
 for (var i=0; i<max; i++)
-create(fetchAll);
+create(fetchOne);
 
 // fetches a single index
 //fetchOne();
