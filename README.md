@@ -5,10 +5,13 @@ Nodejs fork of https://github.com/cavvia/forgetsy temporal trending library. Thi
 
 Please fork and make it better.
 
+#### Installation
+npm install forgetsy-js
+
 #### Import Delta
 
 ```javascript
-var Delta = require(__dirname + '/lib/delta');
+var Delta = require('forgetsy-js').Delta;
 ```
 
 #### Define delta to create

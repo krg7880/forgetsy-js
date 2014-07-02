@@ -36,6 +36,9 @@ function create(cb) {
   });
 }
 
+var max = 100000;
+var count = 0;
+
 // fetch all trending items
 function fetchAll() {
   Delta.get(dist, function(e, delta) {
@@ -43,8 +46,8 @@ function fetchAll() {
 
     delta.fetch({date: getDays(1)}, function(e, trends) {
       if (e) return console.log('Error fetching all trends in ' + dist);
-      console.log(trends);
-      process.exit()
+      if (++count >= max)
+        process.exit()
     });
   });
 }
@@ -60,6 +63,8 @@ function fetchOne() {
   });
 }
 
+
+for (var i=0; i<max; i++)
 create(fetchAll);
 
 // fetches a single index
