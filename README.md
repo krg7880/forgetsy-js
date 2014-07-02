@@ -89,9 +89,11 @@ create(fetchAll);
 ```
 
 ==== Simple test
+
 npm test
 
 ==== Simple Benchmark
+
 Iterations: 10,000
 Operations: create, increment, fetch
 
