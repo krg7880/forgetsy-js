@@ -86,23 +86,24 @@ create(fetchAll);
 ```
 
 #### Example output
-```json
+```javascript
 { 
 	itemTwo: 0.999999999997154
 	, itemOne: 0.9999999999939523 
 }
 ```
 
-#### Simple test
+Testing
+-------
+@Todo - Implement proper testing framework
+
 npm test
 
-##### Simple Benchmark
-Iterations: 10,000
-
-Operations: create, increment, fetch
+Simple Benchmark
+----------------
+**Iterations:** 10,000
+**Operations:** create, increment, fetch
 
 real        0m9.556s
-
 user        0m5.831s
-
 sys        0m3.689s
