@@ -64,7 +64,6 @@ function fetchOne() {
 }
 
 
-for (var i=0; i<max; i++)
 create(fetchOne);
 
 // fetches a single index
