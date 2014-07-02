@@ -101,9 +101,9 @@ npm test
 
 Simple Benchmark
 ----------------
-**Iterations:** 10,000
-**Operations:** create, increment, fetch
++ **Iterations:** 10,000
++ **Operations:** create, increment, fetch
 
-real        0m9.556s
-user        0m5.831s
-sys        0m3.689s
++ real        0m9.556s
++ user        0m5.831s
++ sys        0m3.689s
