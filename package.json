@@ -1,6 +1,6 @@
 {
   "name": "forgetsy-js",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Forgetsy.js is a scalable trending library designed to track temporal trends in non-stationary categorical distributions. NodeJS fork of https://github.com/cavvia/forgetsy.",
   "main": "index.js",
   "repository": "git://github.com/kirk7880/forgetsy-js",
