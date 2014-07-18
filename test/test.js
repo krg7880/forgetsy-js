@@ -1,7 +1,7 @@
 var path = require('path');
 var Delta = require(path.resolve('lib/delta'));
 
-var dist = 'facebooksss';
+var dist = 'twitter';
 var bin = 'itemTwo';
 
 // @todo - integrate convenient date lib
