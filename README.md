@@ -7,7 +7,7 @@ Please fork and make it better.
 
 Installation
 ------------
-npm install forgetsy-js
+npm install [forgetsy-js](https://www.npmjs.org/package/forgetsy-js)
 
 Usage
 -----
