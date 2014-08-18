@@ -87,10 +87,10 @@ create(fetchAll);
 
 #### Example output
 ```javascript
-{ 
-	itemTwo: 0.999999999997154
-	, itemOne: 0.9999999999939523 
-}
+[
+ {'item': 'one': 'score': 0.999999999997154}
+,{'item': 'two': 'score': 0.9999999999939523}
+]
 ```
 
 Testing
