@@ -29,6 +29,10 @@ function getDays(days) {
   return (new Date().getTime() + ((60 * 60 * 24 * 1000) * days));
 }
 
+function getDaysAgo(days) {
+  return (new Date().getTime() - ((60 * 60 * 24 * 1000) * days));
+}
+
 // increment an index -- do this on a view/share/follow, for example
 function increment(cb) {
   Delta.get(dist, function(e, delta) {
@@ -48,7 +52,9 @@ function increment(cb) {
 function create(cb) {
   Delta.create({
     name: dist
-    ,time: getDays(14)
+    ,time: getDays(7) // primary distribution 
+    ,secondaryTime: getDays(14) // secondary distribution
+    ,secondaryDate: getDaysAgo(7) // secondary distribution 
   }, function(e, delta) {
     if (e) return console.log('Error creating delta', e);
 
