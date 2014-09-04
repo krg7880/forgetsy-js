@@ -55,7 +55,7 @@ promise.then(function(delta) {
 });
 ```
 
-### Fetch a distribution (all)
+### Fetch distribution (all)
 ```javascript
 var promise = delta.get(name);
 
@@ -72,13 +72,31 @@ promise.then(function(delta) {
 })
 ```
 
-### Fetch a distribution (one)
+### Fetch distribution (one)
 ```javascript
 var promise = delta.get(name);
 
 promise.then(function(delta) {
   // specify the bin to fetch
   var promise = delta.fetch({bin: bin});
+
+  promise.then(function(trends) {
+    console.log(trends);
+  })
+
+  promise.catch(function(e) {
+    // error fetching distribution
+  })
+})
+```
+
+### Fetch distribution (n)
+```javascript
+var promise = delta.get(name);
+
+promise.then(function(delta) {
+  // specify the bin to fetch
+  var promise = delta.fetch({limit: 10});
 
   promise.then(function(trends) {
     console.log(trends);
