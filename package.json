@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": "git://github.com/kirk7880/forgetsy-js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha"
+    "test": "make test"
   },
   "dependencies": {
     "redis": "*",
@@ -15,7 +15,12 @@
   "devDependencies": {
     "fakeredis": "*",
     "mocha": "*",
-    "chai": "*"
+    "chai": "*",
+    "istanbul": "*",
+    "mocha-istanbul": "*",
+    "coveralls": "*",
+    "mocha-lcov-reporter": "*",
+    "jshint": "2.x.x"
   },
   "keywords": [
     "trend"
