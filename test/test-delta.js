@@ -10,7 +10,8 @@ var expect = chai.expect;
 var client = redis.createClient();
 Delta.setRedisClient(client);
 
-var dist = 'people_camping';
+var dist = 'facebook-shares';
+var bin = 'my-content-id'
 
 function getDays(days) {
   return (new Date().getTime() + ((60 * 60 * 24 * 1000) * days));
@@ -40,15 +41,33 @@ describe('testing delta', function() {
       })
   })
 
-  it('should return a valid dist set', function(done) {
+  it('should increment a bin in the distribution', function(done) {
+    Delta.get(dist)
+      .then(function onGetComplete(delta) {
+        delta.incr({
+          bin: bin
+          ,by: 1
+        })
+          .then(function(res) {
+            done();
+          })
+          .catch(function(e) {
+            console.log(e)
+          });
+      })
+      .catch(function onGetError(e) {
+        console.log(e);
+      })
+  })
+
+  it('should fetch all items in distribution', function(done) {
     Delta.get(dist)
       .then(function onGetComplete(delta) {
         delta.fetch().then(function(results) {
-          console.log('results', results);
           done()
         })
         .catch(function(e) {
-          console.log('Fetch error');
+          
         })
       })
       .catch(function onGetError(e) {
