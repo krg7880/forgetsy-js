@@ -64,7 +64,7 @@ promise.then(function(delta) {
 });
 ```
 
-### Fetch distribution (all)
+#### Fetch distribution (all)
 ```javascript
 var promise = delta.get(name);
 
@@ -81,7 +81,7 @@ promise.then(function(delta) {
 })
 ```
 
-### Fetch distribution (one)
+#### Fetch distribution (one)
 ```javascript
 var promise = delta.get(name);
 
@@ -99,7 +99,7 @@ promise.then(function(delta) {
 })
 ```
 
-### Fetch distribution (n)
+#### Fetch distribution (n)
 ```javascript
 var promise = delta.get(name);
 
