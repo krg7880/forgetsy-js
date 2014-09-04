@@ -11,10 +11,17 @@ npm install [forgetsy-js](https://www.npmjs.org/package/forgetsy-js)
 
 ## Usage
 
+### Initializing
+```javascript
+var redis = require('redis');
+var client = redis.createClient();
+
+var delta = require('forgetsy-js');
+delta.setRedisClient(client);
+```
+
 ### Create a distribution
 ```javascript
-var delta = require('forgetsy-js');
-
 // name of distribution
 var name = 'facebook-shares';
 
