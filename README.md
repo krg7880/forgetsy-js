@@ -2,13 +2,18 @@
 
 ## Status
 
-[![Build Status](https://travis-ci.org/kirk7880/forgetsy-js.svg?branch=feature/promise)](https://travis-ci.org/kirk7880/forgetsy-js) [![Coverage Status](https://coveralls.io/repos/kirk7880/forgetsy-js/badge.png?branch=feature/promise)](https://coveralls.io/r/kirk7880/forgetsy-js?branch=feature/promise)
+[![Build Status](https://travis-ci.org/kirk7880/forgetsy-js.svg?branch=master)](https://travis-ci.org/kirk7880/forgetsy-js) [![Coverage Status](https://coveralls.io/repos/kirk7880/forgetsy-js/badge.png?branch=master)](https://coveralls.io/r/kirk7880/forgetsy-js?branch=master)
 
 ## NPM Stats
 [![NPM](https://nodei.co/npm/forgetsy-js.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/json-promise/)
 
+## NOTICE
+This library was converted to use Promise/A+. Please see usage instructions below. 
+
 ## Description
-Nodejs fork of [Forgetsy](https://github.com/cavvia/forgetsy) temporal trending library. This is still work in progress and needs proper testing and still undergoing heavy development. If you discover an issue, please open a ticket to have it resolved or fork and fix :-) The project use [Redis](https://github.com/antirez/redis) as the backend. 
+Node.JS fork [Forgetsy](https://github.com/cavvia/forgetsy), a trending library designed to track temporal trends in non-stationary categorical distributions. Please fork or file an bug if you discover an issue. The project use [Redis](https://github.com/antirez/redis) as the backend. 
+
+Considering this is a library, you will need to build an API layer on top to make use of it. Work is in progress to create a light-weight API to, at a minimum, demonstrate how to use the library. 
 
 Please fork and make it better.
 
