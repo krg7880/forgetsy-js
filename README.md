@@ -55,7 +55,7 @@ promise.then(function(delta) {
 });
 ```
 
-### Fetch a distribution
+### Fetch a distribution (all)
 ```javascript
 var promise = delta.get(name);
 
@@ -72,7 +72,25 @@ promise.then(function(delta) {
 })
 ```
 
-#### Example output
+### Fetch a distribution (one)
+```javascript
+var promise = delta.get(name);
+
+promise.then(function(delta) {
+  // specify the bin to fetch
+  var promise = delta.fetch({bin: bin});
+
+  promise.then(function(trends) {
+    console.log(trends);
+  })
+
+  promise.catch(function(e) {
+    // error fetching distribution
+  })
+})
+```
+
+### Example output
 ```javascript
 [
  {'item': 'one': 'score': 0.999999999997154}
@@ -80,16 +98,5 @@ promise.then(function(delta) {
 ]
 ```
 
-## Testing
-@Todo - Implement proper testing framework
-
+### Testing
 npm test
-
-## Simple Benchmark
-**Iterations:** 10,000
-
-**Operations:** create, increment, fetch
-
-+ real       0m9.556s
-+ user       0m5.831s
-+ sys        0m3.689s

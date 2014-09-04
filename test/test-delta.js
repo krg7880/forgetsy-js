@@ -1,4 +1,4 @@
-var Delta = require('../index');
+var delta = require('../index');
 var path = require('path');
 var Promise = require('bluebird');
 
@@ -8,7 +8,7 @@ var chai = require('chai');
 var expect = chai.expect;
 
 var client = redis.createClient();
-Delta.setRedisClient(client);
+delta.setRedisClient(client);
 
 var dist = 'facebook-shares';
 var bin = 'my-content-id'
@@ -19,7 +19,7 @@ function getDays(days) {
 
 describe('testing delta', function() {
   it('should be a valid delta instance', function(done) {
-    Delta.create({
+    delta.create({
       name: dist
       ,time: getDays(14)
     })
@@ -32,7 +32,7 @@ describe('testing delta', function() {
   });
 
   it('should return a valid dist', function(done) {
-    Delta.get(dist)
+    delta.get(dist)
       .then(function onGetComplete(delta) {
         done();
       })
@@ -42,7 +42,7 @@ describe('testing delta', function() {
   })
 
   it('should increment a bin in the distribution', function(done) {
-    Delta.get(dist)
+    delta.get(dist)
       .then(function onGetComplete(delta) {
         delta.incr({
           bin: bin
@@ -61,7 +61,7 @@ describe('testing delta', function() {
   })
 
   it('should fetch all items in distribution', function(done) {
-    Delta.get(dist)
+    delta.get(dist)
       .then(function onGetComplete(delta) {
         delta.fetch().then(function(results) {
           done()
