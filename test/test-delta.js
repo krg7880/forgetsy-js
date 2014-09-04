@@ -7,7 +7,7 @@ var redis = require('fakeredis');
 var chai = require('chai');
 var expect = chai.expect;
 
-var client = redis.createClient("", "", "");
+var client = redis.createClient();
 Delta.setRedisClient(client);
 
 var dist = 'people_camping';
