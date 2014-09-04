@@ -1,7 +1,19 @@
-forgetsy-js
-===========
+# forgetsy-js
 
-Nodejs fork of [Forgetsy](https://github.com/cavvia/forgetsy) temporal trending library. This is still work in progress and needs proper testing and still undergoing heavy development. If you discover an issue, please open a ticket to have it resolved or fork and fix :-) The project use [Redis](https://github.com/antirez/redis) as the backend. 
+## Status
+
+[![Build Status](https://travis-ci.org/kirk7880/forgetsy-js.svg?branch=master)](https://travis-ci.org/kirk7880/forgetsy-js) [![Coverage Status](https://coveralls.io/repos/kirk7880/forgetsy-js/badge.png?branch=master)](https://coveralls.io/r/kirk7880/forgetsy-js?branch=master)
+
+## NPM Stats
+[![NPM](https://nodei.co/npm/forgetsy-js.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/json-promise/)
+
+## NOTICE
+This library was converted to use Promise/A+. Please see usage instructions below. 
+
+## Description
+Node.JS fork [Forgetsy](https://github.com/cavvia/forgetsy), a trending library designed to track temporal trends in non-stationary categorical distributions. Please fork or file an bug if you discover an issue. The project use [Redis](https://github.com/antirez/redis) as the backend. 
+
+Considering this is a library, you will need to build an API layer on top to make use of it. Work is in progress to create a light-weight API to, at a minimum, demonstrate how to use the library. 
 
 Please fork and make it better.
 
@@ -9,89 +21,115 @@ Installation
 ------------
 npm install [forgetsy-js](https://www.npmjs.org/package/forgetsy-js)
 
-Usage
------
+## Usage
 
+#### Initializing
 ```javascript
-var Delta = require('forgetsy-js').Delta;
+// setup redis
+var redis = require('redis');
+var client = redis.createClient();
+
+// setup forgetsy-js & pass redis client
+var delta = require('forgetsy-js');
+delta.setRedisClient(client);
 ```
 
-#### Define delta to create
+#### Create a distribution
 ```javascript
-var dist = 'shares';
+// name of distribution
+var name = 'facebook-shares';
+
+// name of bin
 var bin = 'my-content-id';
+
+var promise = delta.create({
+  name: name
+  , time: time
+});
+
+promise.then(function(delta) {
+  // the distribution was create..
+});
+
+promise.catch(function(e) {
+  // there was an error creating distribution
+});
 ```
 
-##### Create, increment and fetch the trends 
+#### Increment a bin
 ```javascript
-// @todo - integrate convenient date lib
-function getDays(days) {
-  return (new Date().getTime() + ((60 * 60 * 24 * 1000) * days));
-}
+var promise = delta.get(name);
 
-function getDaysAgo(days) {
-  return (new Date().getTime() - ((60 * 60 * 24 * 1000) * days));
-}
-
-// increment an index -- do this on a view/share/follow, for example
-function increment(cb) {
-  Delta.get(dist, function(e, delta) {
-    if (e) return console.log('Error fetching delta', e);
-    // increment a new bin
-    delta.incr({
-      bin: bin
-      ,by: 1
-    }, function(e) {
-      if (e) return console.log('Error incrementing bin', e);
-      cb();
-    });
+promise.then(function(delta) {
+  var promise = delta.incr({
+    bin: bin
+    ,by: 1
   });
-}
 
-// create a new delta
-function create(cb) {
-  Delta.create({
-    name: dist
-    ,time: getDays(7) // primary distribution 
-    ,secondaryTime: getDays(14) // secondary distribution
-    ,secondaryDate: getDaysAgo(7) // secondary distribution 
-  }, function(e, delta) {
-    if (e) return console.log('Error creating delta', e);
-
-    increment(cb);
+  promise.then(function() {
+    // bin was incremented
   });
-}
 
-// fetch all trending items
-function fetchAll() {
-  Delta.get(dist, function(e, delta) {
-    if (e) return console.log('Delta does not exists', e);
-
-    delta.fetch({}, function(e, trends) {
-      if (e) return console.log('Error fetching all trends in ' + dist);
-      process.exit()
-    });
-  });
-}
-
-function fetchOne() {
-  Delta.get(dist, function(e, delta) {
-    if (e) return console.log('Delta does not exists', e);
-
-    delta.fetch({bin: bin}, function(e, trends) {
-      if (e) return console.log('Error fetching a single bin in ' + dist);
-      console.log('Trends', trends);
-    });
-  });
-}
-
-create(fetchAll);
-
-// fetches a single index
-//fetchOne();
+  promise.catch(function(e) {
+    // bin was not incremented
+  })
+});
 ```
 
-#### Example output
+#### Fetch distribution (all)
+```javascript
+var promise = delta.get(name);
+
+promise.then(function(delta) {
+  var promise = delta.fetch();
+
+  promise.then(function(trends) {
+    console.log(trends);
+  })
+
+  promise.catch(function(e) {
+    // error fetching distribution
+  })
+})
+```
+
+#### Fetch distribution (one)
+```javascript
+var promise = delta.get(name);
+
+promise.then(function(delta) {
+  // specify the bin to fetch
+  var promise = delta.fetch({bin: bin});
+
+  promise.then(function(trends) {
+    console.log(trends);
+  })
+
+  promise.catch(function(e) {
+    // error fetching distribution
+  })
+})
+```
+
+#### Fetch distribution (n)
+```javascript
+var promise = delta.get(name);
+
+promise.then(function(delta) {
+  // specify the bin to fetch
+  var promise = delta.fetch({limit: 10});
+
+  promise.then(function(trends) {
+    console.log(trends);
+  })
+
+  promise.catch(function(e) {
+    // error fetching distribution
+  })
+})
+```
+
+### Example output
 ```javascript
 [
  {'item': 'one': 'score': 0.999999999997154}
@@ -99,18 +137,5 @@ create(fetchAll);
 ]
 ```
 
-Testing
--------
-@Todo - Implement proper testing framework
-
+### Testing
 npm test
-
-Simple Benchmark
-----------------
-**Iterations:** 10,000
-
-**Operations:** create, increment, fetch
-
-+ real       0m9.556s
-+ user       0m5.831s
-+ sys        0m3.689s

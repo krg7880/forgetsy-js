@@ -5,19 +5,30 @@
   "main": "index.js",
   "repository": "git://github.com/kirk7880/forgetsy-js",
   "scripts": {
-    "test": "time node test/test.js"
+    "test": "make test"
   },
   "dependencies": {
     "redis": "*",
-    "hiredis": "*"
+    "hiredis": "*",
+    "bluebird": "*"
   },
   "devDependencies": {
-    "moment": "*"
+    "fakeredis": "*",
+    "mocha": "*",
+    "chai": "*",
+    "istanbul": "*",
+    "mocha-istanbul": "*",
+    "coveralls": "*",
+    "mocha-lcov-reporter": "*",
+    "jshint": "2.x.x"
   },
   "keywords": [
     "trend"
     ,"trends"
     ,"trending"
+    ,"library"
+    ,"redis"
+    ,"hiredis"
   ],
   "author": "Kirk Gordon<kirk7880@gmail.com>",
   "license": "MIT"
