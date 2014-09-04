@@ -9,10 +9,14 @@
   },
   "dependencies": {
     "redis": "*",
-    "hiredis": "*"
+    "hiredis": "*",
+    "bluebird": "*"
   },
   "devDependencies": {
-    "moment": "*"
+    "moment": "*",
+    "fakeredis": "*",
+    "mocha": "*",
+    "chai": "*"
   },
   "keywords": [
     "trend"
