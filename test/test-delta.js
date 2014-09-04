@@ -1,4 +1,5 @@
 /* jshint unused:false */
+
 'use strict';
 var delta = require('../index');
 var path = require('path');
@@ -153,7 +154,7 @@ describe('testing delta', function() {
   });
 
   it('should return the new most trending item', function(done) {
-    var bin = bins[3];
+    var bin = bins[1];
     increment(bin, 4, function() {
       delta.get(dist)
       .then(function onGetComplete(delta) {
