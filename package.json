@@ -13,7 +13,6 @@
     "bluebird": "*"
   },
   "devDependencies": {
-    "moment": "*",
     "fakeredis": "*",
     "mocha": "*",
     "chai": "*"
@@ -22,6 +21,9 @@
     "trend"
     ,"trends"
     ,"trending"
+    ,"library"
+    ,"redis"
+    ,"hiredis"
   ],
   "author": "Kirk Gordon<kirk7880@gmail.com>",
   "license": "MIT"
