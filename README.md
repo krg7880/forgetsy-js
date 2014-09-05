@@ -16,6 +16,7 @@
     - [Fetch distribution (one)](#fetch-distribution-one)
     - [Fetch distribution (n)](#fetch-distribution-n)
   - [Example output](#example-output)
+  - [Complete Example](#complete-example)
 - [Basic Demo](#basic-demo)
     - [Create a distribution](#create-a-distribution-1)
     - [Increment a bin](#increment-a-bin-1)
