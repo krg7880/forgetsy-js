@@ -29,9 +29,11 @@ example, "type" could easily refer to "music." (Probably sans "street" [:-])
 [http://104.131.230.35/create?categories=classical,moden,street&type=art](http://104.131.230.35/create?categories=classical,moden,street&type=art)
 
 #### Increment a bin
-Here we will trend a bin, "banksy," the famous street artist. 
+Here we will trend a bin, "banksy & Barbara Kruger" the famous street artist. 
 
 [http://104.131.230.35/incr?categories=street&type=art&bin=banksy](http://104.131.230.35/incr?categories=street&type=art&bin=banksy)
+
+[http://104.131.230.35/incr?categories=street&type=art&bin=Barbara Kruger](http://104.131.230.35/incr?categories=street&type=art&bin=Barbara Kruger)
 
 #### Fetch distribution
 Here we will fetch what's trending in category "street" of type "art"
