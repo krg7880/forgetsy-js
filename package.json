@@ -20,7 +20,8 @@
     "mocha-istanbul": "*",
     "coveralls": "*",
     "mocha-lcov-reporter": "*",
-    "jshint": "2.x.x"
+    "jshint": "2.x.x",
+    "doctoc": "*"
   },
   "keywords": [
     "trend"
