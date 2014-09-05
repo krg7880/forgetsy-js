@@ -16,6 +16,7 @@
     - [Fetch distribution (one)](#fetch-distribution-one)
     - [Fetch distribution (n)](#fetch-distribution-n)
   - [Example output](#example-output)
+  - [Complete Example](#complete-example)
 - [Basic Demo](#basic-demo)
     - [Create a distribution](#create-a-distribution-1)
     - [Increment a bin](#increment-a-bin-1)
@@ -74,7 +75,7 @@ var promise = delta.create({
   , time: time
 });
 
-promise.then(function(delta) {
+promise.then(function(dist) {
   // the distribution was create..
 });
 
@@ -87,8 +88,8 @@ promise.catch(function(e) {
 ```javascript
 var promise = delta.get(name);
 
-promise.then(function(delta) {
-  var promise = delta.incr({
+promise.then(function(dist) {
+  var promise = dist.incr({
     bin: bin
     ,by: 1
   });
@@ -107,8 +108,8 @@ promise.then(function(delta) {
 ```javascript
 var promise = delta.get(name);
 
-promise.then(function(delta) {
-  var promise = delta.fetch();
+promise.then(function(dist) {
+  var promise = dist.fetch();
 
   promise.then(function(trends) {
     console.log(trends);
@@ -124,9 +125,9 @@ promise.then(function(delta) {
 ```javascript
 var promise = delta.get(name);
 
-promise.then(function(delta) {
+promise.then(function(dist) {
   // specify the bin to fetch
-  var promise = delta.fetch({bin: bin});
+  var promise = dist.fetch({bin: bin});
 
   promise.then(function(trends) {
     console.log(trends);
@@ -142,9 +143,9 @@ promise.then(function(delta) {
 ```javascript
 var promise = delta.get(name);
 
-promise.then(function(delta) {
+promise.then(function(dist) {
   // specify the bin to fetch
-  var promise = delta.fetch({limit: 10});
+  var promise = dist.fetch({limit: 10});
 
   promise.then(function(trends) {
     console.log(trends);
@@ -162,6 +163,43 @@ promise.then(function(delta) {
  {'item': 'one': 'score': 0.999999999997154}
 ,{'item': 'two': 'score': 0.9999999999939523}
 ]
+```
+
+### Complete Example
+```javascript
+var name = 'facebook-shares';
+var bin = 'my-content-id2';
+
+// create distribution
+delta.create({
+  name: name,
+  time: getDays(14)
+})
+.then(function(dist) {
+  
+  // increment a bin
+  dist.incr({
+    bin: bin,
+    by: 1
+  })
+  .then(function() {
+
+    // fetch trends
+    dist.fetch()
+    .then(function(trends) {
+      console.log(trends);
+    })
+    .catch(function(e) {
+      // error fetching trends
+    });
+  })
+  .catch(function(e) {
+    // bin was not incremented
+  });
+})
+.catch(function(e) {
+  // there was an error creating distribution
+});
 ```
 
 ## Basic Demo
