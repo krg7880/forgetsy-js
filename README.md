@@ -170,25 +170,27 @@ promise.then(function(dist) {
 var name = 'facebook-shares';
 var bin = 'my-content-id2';
 
+// create distribution
 delta.create({
   name: name,
   time: getDays(14)
 })
 .then(function(dist) {
-  // delta created
-  // in
+  
+  // increment a bin
   dist.incr({
     bin: bin,
     by: 1
   })
   .then(function() {
 
+    // fetch trends
     dist.fetch()
     .then(function(trends) {
       console.log(trends);
     })
     .catch(function(e) {
-      // error fetching distribution
+      // error fetching trends
     });
   })
   .catch(function(e) {
