@@ -3,30 +3,31 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [forgetsy-js](#forgetsy-js)
-  - [Status](#status)
-  - [NPM Stats](#npm-stats)
-  - [NOTICE](#notice)
-  - [Description](#description)
-  - [Installation](#installation)
-  - [Usage](#usage)
-      - [Initializing](#initializing)
-      - [Create a distribution](#create-a-distribution)
-      - [Increment a bin](#increment-a-bin)
-      - [Fetch distribution (all)](#fetch-distribution-all)
-      - [Fetch distribution (one)](#fetch-distribution-one)
-      - [Fetch distribution (n)](#fetch-distribution-n)
-    - [Example output](#example-output)
-  - [Basic Demo](#basic-demo)
-      - [Create a distribution](#create-a-distribution-1)
-      - [Increment a bin](#increment-a-bin-1)
-      - [Fetch distribution](#fetch-distribution)
-      - [Fetch all distributions](#fetch-all-distributions)
-      - [Fetch all distributions with geo-location trends](#fetch-all-distributions-with-geo-location-trends)
-    - [Testing](#testing)
+- [Status](#status)
+- [NPM Stats](#npm-stats)
+- [NOTICE](#notice)
+- [Description](#description)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Initializing](#initializing)
+    - [Create a distribution](#create-a-distribution)
+    - [Increment a bin](#increment-a-bin)
+    - [Fetch distribution (all)](#fetch-distribution-all)
+    - [Fetch distribution (one)](#fetch-distribution-one)
+    - [Fetch distribution (n)](#fetch-distribution-n)
+  - [Example output](#example-output)
+- [Basic Demo](#basic-demo)
+    - [Create a distribution](#create-a-distribution-1)
+    - [Increment a bin](#increment-a-bin-1)
+    - [Fetch distribution](#fetch-distribution)
+    - [Fetch all distributions](#fetch-all-distributions)
+    - [Fetch all distributions with geo-location trends](#fetch-all-distributions-with-geo-location-trends)
+  - [Testing](#testing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# forgetsy-js
+## forgetsy-js
+NodeJS Trending library
 
 ## Status
 
