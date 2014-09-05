@@ -38,12 +38,12 @@ Here we will trend a bin, "banksy & Barbara Kruger" the famous street artist.
 #### Fetch distribution
 Here we will fetch what's trending in category "street" of type "art"
 
-[http://104.131.230.35/fetch?categories=street&type=art](http://104.131.230.35/fetch?categories=street&type=art&filter=geoip)
+[http://104.131.230.35/fetch?categories=street&type=art&filters=geoip](http://104.131.230.35/fetch?categories=street&type=art&filters=geoip)
 
 #### Fetch all distributions
 Here we will fetch what's trending in all of the categories of type "art"
 
-[http://104.131.230.35/fetch?categories=classical,moden,street&type=art](http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filter=geoip)
+[http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filters=geoip](http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filters=geoip)
 
 #### Fetch all distributions with geo-location trends
 Here we will fetch what's trending in all of the categories of type "art" and
