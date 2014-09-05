@@ -35,7 +35,7 @@ NodeJS Trending library
 [![Build Status](https://travis-ci.org/kirk7880/forgetsy-js.svg?branch=master)](https://travis-ci.org/kirk7880/forgetsy-js) [![Coverage Status](https://coveralls.io/repos/kirk7880/forgetsy-js/badge.png?branch=master)](https://coveralls.io/r/kirk7880/forgetsy-js?branch=master)
 
 ## NPM Stats
-[![NPM](https://nodei.co/npm/forgetsy-js.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/json-promise/)
+[![NPM](https://nodei.co/npm/forgetsy-js.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/forgetsy-js/)
 
 ## NOTICE
 This library was converted to use Promise/A+. Please see usage instructions below. 
