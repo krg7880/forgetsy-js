@@ -13,7 +13,43 @@ This library was converted to use Promise/A+. Please see usage instructions belo
 ## Description
 Node.JS fork [Forgetsy](https://github.com/cavvia/forgetsy), a trending library designed to track temporal trends in non-stationary categorical distributions. Please fork or file an bug if you discover an issue. The project use [Redis](https://github.com/antirez/redis) as the backend. 
 
-Considering this is a library, you will need to build an API layer on top to make use of it. Work is in progress to create a light-weight API to, at a minimum, demonstrate how to use the library. 
+## Basic Demo
+This is a very basic working API demo.
+
+#### Create a distribution
+Categories are the distributions to create
+* classical
+* modern
+* street
+
+Type is the type of distributions we're creating. In this case, the categories 
+are related to "art." You can classify the distributions as you see fit. For 
+example, "type" could easily refer to "music." (Probably sans "street" [:-])
+
+[http://104.131.230.35/create?categories=classical,moden,street&type=art](http://104.131.230.35/create?categories=classical,moden,street&type=art)
+
+#### Increment a bin
+Here we will trend a bin, "banksy," the famous street artist. 
+
+[http://104.131.230.35/incr?categories=street&type=art&bin=banksy](http://104.131.230.35/incr?categories=street&type=art&bin=banksy)
+
+#### Fetch distribution
+Here we will fetch what's trending in category "street" of type "art"
+
+[http://104.131.230.35/fetch?categories=street&type=art](http://104.131.230.35/fetch?categories=street&type=art&filter=geoip)
+
+#### Fetch all distributions
+Here we will fetch what's trending in all of the categories of type "art"
+
+[http://104.131.230.35/fetch?categories=classical,moden,street&type=art](http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filter=geoip)
+
+#### Fetch all distributions with geo-location trends
+Here we will fetch what's trending in all of the categories of type "art" and
+geo-location trends. Behind the scenes, the API is detecting your location and
+trending based on geo-location as well (assuming your location was detected!)
+
+[http://104.131.230.35/fetch?categories=classical,moden,street&type=art](http://104.131.230.35/fetch?categories=classical,moden,street&type=art)
+
 
 Please fork and make it better.
 
