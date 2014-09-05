@@ -215,14 +215,14 @@ Type is the type of distributions we're creating. In this case, the categories
 are related to "art." You can classify the distributions as you see fit. For 
 example, "type" could easily refer to "music." (Probably sans "street" [:-])
 
-[http://104.131.230.35/create?categories=classical,moden,street&type=art](http://104.131.230.35/create?categories=classical,moden,street&type=art)
+[http://104.131.230.35/create?categories=classical,modern,street&type=art](http://104.131.230.35/create?categories=classical,modern,street&type=art)
 
 #### Increment a bin
 Here we will trend a bin, "banksy & Barbara Kruger" the famous street artist. 
 
 [http://104.131.230.35/incr?categories=street&type=art&bin=banksy](http://104.131.230.35/incr?categories=street&type=art&bin=banksy)
 
-[http://104.131.230.35/incr?categories=street&type=art&bin=Barbara Kruger](http://104.131.230.35/incr?categories=street&type=art&bin=Barbara Kruger)
+[http://104.131.230.35/incr?categories=street&type=art&bin=Barbara Kruger](http://104.131.230.35/incr?categories=street&type=art&bin=Barbara%20Kruger)
 
 #### Fetch distribution
 Here we will fetch what's trending in category "street" of type "art"
@@ -232,14 +232,14 @@ Here we will fetch what's trending in category "street" of type "art"
 #### Fetch all distributions
 Here we will fetch what's trending in all of the categories of type "art"
 
-[http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filters=geoip](http://104.131.230.35/fetch?categories=classical,moden,street&type=art&filters=geoip)
+[http://104.131.230.35/fetch?categories=classical,modern,street&type=art&filters=geoip](http://104.131.230.35/fetch?categories=classical,modern,street&type=art&filters=geoip)
 
 #### Fetch all distributions with geo-location trends
 Here we will fetch what's trending in all of the categories of type "art" and
 geo-location trends. Behind the scenes, the API is detecting your location and
 trending based on geo-location as well (assuming your location was detected!)
 
-[http://104.131.230.35/fetch?categories=classical,moden,street&type=art](http://104.131.230.35/fetch?categories=classical,moden,street&type=art)
+[http://104.131.230.35/fetch?categories=classical,modern,street&type=art](http://104.131.230.35/fetch?categories=classical,modern,street&type=art)
 
 ### Testing
 npm test
