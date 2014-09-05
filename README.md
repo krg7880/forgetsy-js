@@ -23,7 +23,7 @@
     - [Fetch distribution](#fetch-distribution)
     - [Fetch all distributions](#fetch-all-distributions)
     - [Fetch all distributions with geo-location trends](#fetch-all-distributions-with-geo-location-trends)
-  - [Testing](#testing)
+- [Test](#test)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -241,5 +241,5 @@ trending based on geo-location as well (assuming your location was detected!)
 
 [http://104.131.230.35/fetch?categories=classical,modern,street&type=art](http://104.131.230.35/fetch?categories=classical,modern,street&type=art)
 
-### Testing
+## Test
 npm test
