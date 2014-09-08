@@ -65,7 +65,7 @@ describe('testing delta', function() {
       });
   });
 
-  it('should increment a several bins in the distribution', function(done) {
+  it('should increment several bins in the distribution', function(done) {
     var count = 0;
     var run = function(idx) {
       if (idx < bins.length) {
